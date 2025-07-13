@@ -11,6 +11,6 @@ assignees: jkjan
 
 ## 💡 Changes
 
-## 🔗 Related Item
+## 🔗 Related JIRA ticket
 
 ## 📝 Future Work
