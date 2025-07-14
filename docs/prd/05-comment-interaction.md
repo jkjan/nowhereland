@@ -1,4 +1,4 @@
-# Comment Management & Moderation - PRD
+# Comment Interaction & Moderation - PRD
 
 ## 📋 Domain Overview
 
@@ -10,8 +10,8 @@
 
 ## 🎯 Use Cases
 
-### UC-CM-001: Submit Anonymous Comment
-**ID**: UC-CM-001  
+### UC-CI-001: Submit Anonymous Comment
+**ID**: UC-CI-001  
 **Name**: Submit Comment on Blog Post  
 **Actor**: Anonymous User  
 **Trigger**: User wants to leave comment on post  
@@ -89,8 +89,8 @@ sequenceDiagram
 
 ---
 
-### UC-CM-002: Edit/Delete Own Comment
-**ID**: UC-CM-002  
+### UC-CI-002: Edit/Delete Own Comment
+**ID**: UC-CI-002  
 **Name**: Modify Own Comment with Password  
 **Actor**: Anonymous User (Comment Author)  
 **Trigger**: User wants to edit or delete their comment  
@@ -163,8 +163,8 @@ sequenceDiagram
 
 ---
 
-### UC-CM-003: Reply to Comment (1 Depth)
-**ID**: UC-CM-003  
+### UC-CI-003: Reply to Comment (1 Depth)
+**ID**: UC-CI-003  
 **Name**: Reply to Existing Comment  
 **Actor**: Anonymous User  
 **Trigger**: User wants to reply to a comment  
@@ -236,8 +236,8 @@ sequenceDiagram
 
 ---
 
-### UC-CM-004: Admin Keyword Management
-**ID**: UC-CM-004  
+### UC-CI-004: Admin Keyword Management
+**ID**: UC-CI-004  
 **Name**: Configure Content Filtering Keywords  
 **Actor**: Blog Administrator  
 **Trigger**: Admin wants to update comment filtering rules  
@@ -307,8 +307,8 @@ sequenceDiagram
 
 ---
 
-### UC-CM-005: Admin Flag Review & Moderation
-**ID**: UC-CM-005  
+### UC-CI-005: Admin Flag Review & Moderation
+**ID**: UC-CI-005  
 **Name**: Review and Moderate Flagged Comments  
 **Actor**: Blog Administrator  
 **Trigger**: Admin checks flagged comments for moderation  
@@ -389,8 +389,8 @@ sequenceDiagram
 
 ---
 
-### UC-CM-006: Admin Comment Flag Notification
-**ID**: UC-CM-006  
+### UC-CI-006: Admin Comment Flag Notification
+**ID**: UC-CI-006  
 **Name**: Notify Admin of New Flagged Comments  
 **Actor**: System  
 **Trigger**: Comment gets flagged by content filter  
@@ -490,7 +490,7 @@ sequenceDiagram
 
 ## 📊 Acceptance Criteria
 
-### UC-CM-001 (Submit Comment)
+### UC-CI-001 (Submit Comment)
 - [ ] Comment form accepts nickname, password, content
 - [ ] Password hashed before database storage
 - [ ] Content filtering via Supabase Edge Function
@@ -498,35 +498,35 @@ sequenceDiagram
 - [ ] Approved comments visible immediately
 - [ ] Rate limiting prevents spam (5 per hour per IP)
 
-### UC-CM-002 (Edit/Delete Comment)
+### UC-CI-002 (Edit/Delete Comment)
 - [ ] Password verification required for edit/delete
 - [ ] Edit form pre-populated with existing content
 - [ ] Edited comments go through same filtering
 - [ ] Delete is soft delete with audit trail
 - [ ] Password attempts are rate limited
 
-### UC-CM-003 (Reply System)
+### UC-CI-003 (Reply System)
 - [ ] Reply button available on parent comments only
 - [ ] 1-level depth limit enforced
 - [ ] Replies visually nested with indentation
 - [ ] "Reply to @nickname" indicator shown
 - [ ] Same filtering and moderation as parent comments
 
-### UC-CM-004 (Keyword Management)
+### UC-CI-004 (Keyword Management)
 - [ ] Admin can add/remove filter keywords
 - [ ] Case-sensitive option configurable
 - [ ] Keyword validation prevents empty/long strings
 - [ ] Changes apply to new comments immediately
 - [ ] Maximum 100 keywords supported
 
-### UC-CM-005 (Flag Moderation)
+### UC-CI-005 (Flag Moderation)
 - [ ] Flagged comments list shows content and context
 - [ ] Approve/Delete/Keep Flagged actions work
 - [ ] Status changes update comment visibility
 - [ ] Moderation actions logged for audit
 - [ ] Empty state shown when no flagged comments
 
-### UC-CM-006 (Flag Notifications)
+### UC-CI-006 (Flag Notifications)
 - [ ] Badge shows count of flagged comments
 - [ ] Real-time updates via Supabase Realtime
 - [ ] Badge disappears when no flags remain

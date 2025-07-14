@@ -97,36 +97,30 @@ graph TB
 - Reference system
 - Content organization
 
-### 2. **User Experience** (UC-UX-xxx)
+### 2. **User Experience** (UC-UM-xxx)
 - Authentication and session management
 - Content consumption and navigation
 - Search and discovery
 - Responsive interactions
 
-### 3. **AI-Enhanced Features** (UC-AI-xxx)
-- Automatic tag generation
-- Abstract creation
-- Content analysis and optimization
-- Quality scoring
-
-### 4. **Media Operations** (UC-MO-xxx)
+### 3. **Media Operations** (UC-MM-xxx)
 - Image upload and processing
 - Thumbnail generation
 - CDN delivery
 - Asset optimization
 
-### 5. **Community Interaction** (UC-CI-xxx)
+### 4. **Community Interaction** (UC-CI-xxx)
 - Comment submission and management
 - Moderation workflows
 - Community guidelines enforcement
 
-### 6. **Analytics & Insights** (UC-AN-xxx)
+### 5. **Analytics & Insights** (UC-AN-xxx)
 - Usage tracking
 - Performance monitoring
 - Content analytics
 - Dashboard reporting
 
-### 7. **Administrative Functions** (UC-AD-xxx)
+### 6. **Administrative Functions** (UC-AS-xxx)
 - System configuration
 - User management
 - Content moderation
