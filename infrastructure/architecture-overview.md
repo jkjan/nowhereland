@@ -156,3 +156,8 @@ The architecture diagram will be generated using the Python script in `/infrastr
 4. Set up CI/CD pipelines
 5. Configure monitoring and alerting
 6. Document operational procedures
+
+@complete-infrastructure-spec.md
+@image-cdn-configuration.md
+@jwt-authentication.md
+@search-infrastructure.md

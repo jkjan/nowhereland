@@ -1,11 +1,15 @@
 # Supabase Edge Functions
 
+## How to develop edge functions
+
+<a href="https://supabase.com/docs/guides/functions/development-tips" target="_blank">Development tips</a>
+
 ## Function List
 
-1. **post-indexer** - Index posts to OpenSearch
+1. **post-manager** - Create/update posts with references, TOC, and search indexing
 2. **search-handler** - Handle search requests and return results
 3. **comment-filter** - Filter comments based on keywords
-4. **comment-moderation** - Handle comment moderation actions
+4. **about-me** - Handle about me update
 5. **comment-notifications** - Update flagged comment notifications
 6. **image-processor** - Process and convert uploaded images
 7. **media-cdn** - Serve images with dynamic resizing
@@ -18,16 +22,16 @@
 
 ## Function Details
 
-### 1. post-indexer
-**Trigger**: Database trigger on post create/update/delete  
-**Purpose**: Keep OpenSearch index synchronized with blog posts
+### 1. post-manager
+**Trigger**: HTTP request from admin frontend (POST/PATCH)
+**Purpose**: Create/update posts with references, TOC, and search indexing
 
 **What it does**:
+- Create/update post in database
+- Create/update references and TOC entries
 - Index post content, title, abstract, tags to OpenSearch
-- Handle post deletion from search index
-- Update existing post data in search index
+- Handle atomic operations (all succeed or all fail)
 - Maintain search relevance scoring
-- Log indexing operations
 
 ```typescript
 // Pseudo-code
@@ -124,56 +128,18 @@ export default async function(req: Request) {
       break
     }
   }
-  
-  return Response.json({
-    status: flagged ? 'flagged' : 'approved',
-    flagged_keywords: flagged ? [keyword] : []
-  })
+
+  // create or update comment
 }
 ```
 
-### 4. comment-moderation
-**Trigger**: HTTP request from admin moderation actions  
-**Purpose**: Process admin moderation decisions on flagged comments
+### 4. about-me
+**Trigger**: User updates about me content with contact details
+**Purpose**: Update(or create) About Me
 
 **What it does**:
-- Update comment status (approved/deleted/flagged)
-- Log moderation action with admin ID
-- Trigger notification updates
-- Handle bulk moderation operations
-- Maintain audit trail
-
-```typescript
-// Pseudo-code
-export default async function(req: Request) {
-  const { comment_id, action, admin_id } = await req.json() // 'approve'|'delete'|'keep_flagged'
-  
-  let new_status
-  switch (action) {
-    case 'approve': new_status = 'approved'; break
-    case 'delete': new_status = 'deleted'; break
-    case 'keep_flagged': new_status = 'flagged'; break
-  }
-  
-  // Update comment status
-  await supabase
-    .from('comments')
-    .update({ status: new_status })
-    .eq('id', comment_id)
-  
-  // Log moderation action
-  await supabase
-    .from('moderation_log')
-    .insert({
-      comment_id,
-      action,
-      admin_id,
-      timestamp: new Date()
-    })
-  
-  return Response.json({ success: true })
-}
-```
+- Update `about_me` table
+- Update `contact` table
 
 ### 5. comment-notifications
 **Trigger**: Database trigger when comment is flagged  

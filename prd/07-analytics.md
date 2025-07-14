@@ -535,7 +535,7 @@ sequenceDiagram
 - [ ] 90-day data retention
 - [ ] Dashboard integration
 
-### UC-AN-006 (Data Export)
+### UC-AN-006 (Data Export) - (Future feature)
 - [ ] CSV and JSON export formats
 - [ ] Date range selection for exports
 - [ ] Aggregated data only (no PII)

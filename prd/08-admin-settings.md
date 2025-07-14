@@ -75,14 +75,14 @@ sequenceDiagram
     participant EDGE as Edge Function
     
     A->>UI: Navigate to Comment Moderation
-    UI->>API: GET /admin/settings/moderation
+    UI->>API: GET /rest/v1/site_setting
     API->>DB: Load moderation config + flagged comments
     DB-->>API: Current settings + comment list
     API-->>UI: Moderation dashboard
     
     A->>UI: Add/remove keywords
     A->>UI: Update moderation settings
-    UI->>API: PUT /admin/settings/moderation
+    UI->>API: PATCH /rest/v1/site_setting
     
     API->>API: Validate keywords and settings
     API->>DB: Update moderation config
@@ -167,7 +167,7 @@ sequenceDiagram
     participant CACHE as Cache Service
     
     A->>UI: Navigate to theme settings
-    UI->>API: GET /admin/settings/theme
+    UI->>API: GET /rest/v1/site_setting
     API->>DB: Load current theme
     DB-->>API: Theme configuration
     API-->>UI: Display color picker + preview
@@ -175,7 +175,7 @@ sequenceDiagram
     A->>UI: Select new colors
     UI->>UI: Show live preview
     A->>UI: Confirm selection
-    UI->>API: PUT /admin/settings/theme
+    UI->>API: PATCH /rest/v1/site_setting
     
     API->>API: Validate colors + accessibility
     
@@ -261,13 +261,13 @@ sequenceDiagram
     participant POSTS as Post Service
     
     A->>UI: Navigate to fixed tags
-    UI->>API: GET /admin/settings/tags
+    UI->>API: GET /rest/v1/fixed_tag
     API->>DB: Load fixed tags + usage stats
     DB-->>API: Tags with usage counts
     API-->>UI: Tag management interface
     
     A->>UI: Add new tag "tutorial"
-    UI->>API: POST /admin/settings/tags
+    UI->>API:  /rest/v1/fixed_tag
     API->>API: Validate format + uniqueness
     
     alt Valid new tag
@@ -282,7 +282,7 @@ sequenceDiagram
     
     opt Delete existing tag
         A->>UI: Delete tag "old-tag"
-        UI->>API: DELETE /admin/settings/tags/old-tag
+        UI->>API: PATCH /rest/v1/fixed_tag/
         API->>POSTS: Check usage in posts
         POSTS-->>API: Used in 5 posts
         
@@ -291,7 +291,7 @@ sequenceDiagram
         
         alt Confirm deletion
             A->>UI: Confirm
-            UI->>API: DELETE /admin/settings/tags/old-tag?force=true
+            UI->>API: PATCH /rest/v1/fixed_tag/
             API->>DB: Remove tag from posts + tag list
             API-->>UI: Tag deleted
         else Cancel
@@ -369,14 +369,14 @@ sequenceDiagram
     participant PAGE as Page Generator
     
     A->>UI: Navigate to About Me editor
-    UI->>API: GET /admin/about-me
+    UI->>API: GET /rest/v1/about_me
     API->>DB: Load current content + contacts
     DB-->>API: About Me data
     API-->>UI: Editor with current content
     
     A->>UI: Edit content + contacts
     A->>UI: Save changes
-    UI->>API: PUT /admin/about-me
+    UI->>API: POST /functions/v1/about-me
     
     API->>VALID: Validate contact formats
     VALID-->>API: Validation results
@@ -464,14 +464,14 @@ sequenceDiagram
     participant CACHE as Cache Service
     
     A->>UI: Navigate to general settings
-    UI->>API: GET /admin/settings/general
+    UI->>API: GET /rest/v1/site_setting
     API->>DB: Load site configuration
     DB-->>API: Current settings
     API-->>UI: Configuration form
     
     A->>UI: Modify settings
     A->>UI: Save changes
-    UI->>API: PUT /admin/settings/general
+    UI->>API: PATCH /rest/v1/site_setting
     
     API->>API: Validate all settings
     
@@ -491,12 +491,12 @@ sequenceDiagram
 
 ---
 
-### UC-AS-006: Admin Profile Management
+### UC-AS-006: Admin User Password Change Password
 **ID**: UC-AS-006  
-**Name**: Manage Admin User Profile  
+**Name**: Manage Admin Change User Password 
 **Actor**: Blog Administrator  
-**Trigger**: Admin wants to update personal account information  
-**Goal**: Maintain admin profile and account security  
+**Trigger**: Admin wants to change password
+**Goal**: Maintain admin security
 
 **Preconditions**:
 - Admin is authenticated
@@ -504,28 +504,16 @@ sequenceDiagram
 - User management system is operational
 
 **Main Flow**:
-1. Admin navigates to Admin Settings → Profile
-2. System displays current admin profile:
-   - Display name
-   - Email address (used for login)
-   - Profile description/bio
-   - Avatar image
-3. Admin updates profile information:
-   - Change display name (affects bylines and signatures)
-   - Update email address (with verification)
-   - Edit profile description for author bio
-4. Admin manages avatar image:
-   - Upload new profile image (JPG/PNG, max 2MB)
-   - System resizes and optimizes image
-   - Preview avatar before saving
-5. Admin can change password:
+1. Admin navigates to Admin Settings → Change Password
+2. Admin updates profile information:
+3. Admin can change password:
    - Enter current password for verification
    - Set new password meeting security requirements
    - Confirm new password
-6. Admin saves profile changes
-7. System validates all updates
-8. System updates admin profile in database
-9. System updates admin identity across site
+5. Admin saves profile changes
+6. System validates all updates
+7. System updates admin profile in database
+8. System updates admin identity across site
 
 **Alternative Flows**:
 - **3b**: Invalid email format → Show validation error
@@ -560,19 +548,6 @@ sequenceDiagram
     participant MEDIA as Media Service
     
     A->>UI: Navigate to profile
-    UI->>API: GET /admin/profile
-    API->>DB: Load admin profile
-    DB-->>API: Profile data
-    API-->>UI: Profile form
-    
-    A->>UI: Update profile fields
-    
-    opt Upload new avatar
-        A->>UI: Upload avatar
-        UI->>MEDIA: Process image
-        MEDIA-->>UI: Optimized avatar URL
-    end
-    
     opt Change password
         A->>UI: Enter current + new password
         UI->>AUTH: Verify current password
@@ -580,7 +555,7 @@ sequenceDiagram
     end
     
     A->>UI: Save changes
-    UI->>API: PUT /admin/profile
+    UI->>API: supabase.auth.updateUser
     
     API->>API: Validate all changes
     
@@ -783,7 +758,7 @@ sequenceDiagram
 - [ ] Email uniqueness validation
 - [ ] Site-wide identity updates
 
-### UC-AS-007 (Settings Backup)
+### UC-AS-007 (Settings Backup) future feature
 - [ ] Selective category export
 - [ ] JSON format validation for imports
 - [ ] Import preview and confirmation

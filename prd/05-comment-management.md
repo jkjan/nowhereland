@@ -69,16 +69,15 @@ sequenceDiagram
     
     U->>UI: Fill comment form
     U->>UI: Click submit
-    UI->>API: POST /comments
+    UI->>API: POST /functions/v1/comment-filter/
     API->>API: Validate input
     API->>API: Hash password
     
-    API->>EDGE: content-filter
+    API->>EDGE: comment-filter
     EDGE->>EDGE: Check against keyword list
-    EDGE-->>API: status: 'approved' | 'flagged'
     
-    API->>DB: Save comment with status
-    DB-->>API: Comment saved
+    EDGE->>DB: Save comment with status
+    EDGE-->>API: status: 'approved' | 'flagged'
     API-->>UI: Success response
     
     alt Comment approved
@@ -146,32 +145,18 @@ sequenceDiagram
     U->>UI: Click edit/delete
     UI->>U: Show password modal
     U->>UI: Enter password
-    UI->>API: POST /comments/{id}/verify
-    API->>DB: Verify password hash
-    
+    UI->>API: POST /functions/v1/comment-delete (or comment-modify)
+    API->>EDGE: Verify password hash
+    EDGE->>DB: Request encrypted password
+    DB->>EDGE: Encrypted password
+
     alt Password correct
-        DB-->>API: Password valid
+        EDGE->>EDGE: comment-filter
+        EDGE->>API: Filter Response
         API-->>UI: Show edit form / confirmation
         
-        opt Edit comment
-            U->>UI: Modify content
-            UI->>API: PUT /comments/{id}
-            API->>EDGE: content-filter
-            EDGE-->>API: status decision
-            API->>DB: Update comment
-            DB-->>API: Updated
-            API-->>UI: Show updated comment
-        end
-        
-        opt Delete comment
-            U->>UI: Confirm deletion
-            UI->>API: DELETE /comments/{id}
-            API->>DB: Soft delete (status='deleted')
-            DB-->>API: Deleted
-            API-->>UI: Remove from display
-        end
     else Password incorrect
-        DB-->>API: Password invalid
+        EDGE-->>API: Password invalid
         API-->>UI: Show error message
     end
 ```
@@ -235,11 +220,11 @@ sequenceDiagram
     U->>UI: Fill reply form
     U->>UI: Submit reply
     
-    UI->>API: POST /comments/{parent_id}/reply
+    UI->>API: POST /fuctions/v1/comment
     API->>API: Validate parent exists & not reply
     API->>API: Validate input & hash password
     
-    API->>EDGE: content-filter
+    API->>EDGE: comment-filter
     EDGE-->>API: status decision
     
     API->>DB: Save reply with parent_comment_id
@@ -304,14 +289,14 @@ sequenceDiagram
     participant EDGE as Edge Function
     
     A->>UI: Navigate to Comment Moderation
-    UI->>API: GET /admin/filter-keywords
+    UI->>API: GET /rest/v1/filter_keyword
     API->>DB: Load current keywords
     DB-->>API: Keywords list
     API-->>UI: Display keyword management
     
     A->>UI: Add/remove keywords
     A->>UI: Click "Save Changes"
-    UI->>API: PUT /admin/filter-keywords
+    UI->>API: POST or PATCH /rest/v1/filter_keyword
     API->>API: Validate keywords
     API->>DB: Update keywords table
     API->>EDGE: Update filter configuration
@@ -380,13 +365,13 @@ sequenceDiagram
     participant DB as Supabase DB
     
     A->>UI: Navigate to Flagged Comments
-    UI->>API: GET /admin/flagged-comments
+    UI->>API: GET /rest/v1/comment?q=status=flagged
     API->>DB: Load comments where status='flagged'
     DB-->>API: Flagged comments with post context
     API-->>UI: Display flagged comments list
     
     A->>UI: Click "Approve" on comment
-    UI->>API: PUT /comments/{id}/moderate
+    UI->>API: PATCH /functions/v1/comment
     API->>DB: UPDATE status='approved'
     API->>DB: Log moderation action
     DB-->>API: Updated
@@ -394,7 +379,7 @@ sequenceDiagram
     
     opt Delete comment
         A->>UI: Click "Delete" on comment
-        UI->>API: DELETE /comments/{id}
+        UI->>API: PATCH /functions/v1/comment
         API->>DB: UPDATE status='deleted'
         API->>DB: Log deletion action
         DB-->>API: Deleted

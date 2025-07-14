@@ -119,7 +119,7 @@ sequenceDiagram
     participant PROC as Image Processor
     
     A->>UI: Upload image (drag/click)
-    UI->>API: POST /media/upload
+    UI->>API: POST /functions/v1/image-processor/
     API->>API: Validate file type & size
     API->>API: Generate filename hash
     
@@ -191,7 +191,7 @@ sequenceDiagram
     participant STORAGE as Supabase Storage
     participant PROC as Image Processor
     
-    C->>CDN: GET /media/{hash}?width=720
+    C->>CDN: GET /functions/v1/media-cdn/{hash}?width=720
     CDN->>STORAGE: Check for /media/{hash}/720.webp
     
     alt Cached version exists
@@ -204,149 +204,6 @@ sequenceDiagram
         PROC-->>CDN: Processed image
         CDN->>STORAGE: Cache processed version
         CDN-->>C: Serve processed image
-    end
-```
-
----
-
-### UC-MM-003: Set Post Thumbnail
-**ID**: UC-MM-003  
-**Name**: Designate Image as Post Thumbnail  
-**Actor**: Blog Administrator  
-**Trigger**: Admin selects image as post thumbnail  
-**Goal**: Set specific image as the featured image for the post  
-
-**Preconditions**:
-- Admin is on post editor page
-- Post contains uploaded images
-- Admin hovers over or selects an image
-
-**Main Flow**:
-1. Admin hovers over image in post editor
-2. System displays "Set as Thumbnail" button overlay
-3. Admin clicks "Set as Thumbnail" button
-4. System highlights selected image with accent border
-5. System updates post metadata with thumbnail reference
-6. System generates thumbnail previews (320px, 480px, 720px)
-7. System stores thumbnail reference in post record
-8. System displays confirmation of thumbnail selection
-9. Previously selected thumbnail (if any) is unselected
-
-**Alternative Flows**:
-- **3a**: Image already is thumbnail → Show "Remove Thumbnail" option
-- **6a**: Thumbnail generation fails → Log error, use original
-
-**Business Rules**:
-- Only one thumbnail per post allowed
-- Thumbnail must be an image within the post content
-- Thumbnail previews generated for responsive display
-- Thumbnail selection saved with post draft
-- Thumbnail visible in post lists and social sharing
-
-**Security Requirements**:
-- Only admin can set thumbnails
-- Thumbnail must reference valid uploaded image
-- Thumbnail metadata validated before saving
-
-**Authorization**: Admin
-
-```mermaid
-sequenceDiagram
-    participant A as Admin
-    participant UI as Post Editor
-    participant API as Content API
-    participant DB as Database
-    participant MEDIA as Media Service
-    
-    A->>UI: Hover over image
-    UI->>A: Show "Set as Thumbnail" button
-    A->>UI: Click set thumbnail
-    UI->>API: POST /posts/{id}/thumbnail
-    
-    API->>MEDIA: Generate thumbnail sizes
-    MEDIA-->>API: Thumbnail URLs
-    
-    API->>DB: Update post thumbnail
-    DB-->>API: Success
-    
-    API-->>UI: Thumbnail set confirmation
-    UI->>A: Highlight image as thumbnail
-```
-
----
-
-### UC-MM-004: Manage Media Library
-**ID**: UC-MM-004  
-**Name**: View and Manage Uploaded Media  
-**Actor**: Blog Administrator  
-**Trigger**: Admin accesses media library  
-**Goal**: Browse, organize, and manage uploaded media assets  
-
-**Preconditions**:
-- Admin is authenticated
-- Admin navigates to media library section
-
-**Main Flow**:
-1. Admin clicks "Media Library" in admin dashboard
-2. System displays grid of uploaded media assets
-3. System shows thumbnails, upload dates, and file info
-4. Admin can search media by filename or metadata
-5. Admin can filter by date range or file type
-6. Admin can sort by upload date, file size, or usage
-7. Admin selects image to view details and usage
-8. System shows which posts use the selected image
-9. Admin can delete unused media (with confirmation)
-10. System updates storage and database accordingly
-
-**Alternative Flows**:
-- **4a**: No media found → Display "No media uploaded" message
-- **9a**: Image in use → Show warning, require force delete confirmation
-- **9b**: Admin cancels deletion → Return to media library
-
-**Business Rules**:
-- Media library shows all uploaded assets
-- Usage tracking shows which posts reference each image
-- Unused media can be safely deleted
-- Bulk operations limited to 20 items
-- Deleted media is permanently removed from storage
-
-**Security Requirements**:
-- Only admin can access media library
-- Delete operations require confirmation
-- Audit trail for media deletion
-- Prevent deletion of in-use media without warning
-
-**Authorization**: Admin
-
-```mermaid
-sequenceDiagram
-    participant A as Admin
-    participant UI as Media Library
-    participant API as Media API
-    participant DB as Database
-    participant STORAGE as Supabase Storage
-    
-    A->>UI: Navigate to media library
-    UI->>API: GET /admin/media
-    API->>DB: Load media assets
-    DB-->>API: Media list with metadata
-    API-->>UI: Media grid data
-    UI->>A: Display media library
-    
-    A->>UI: Select image for details
-    UI->>API: GET /admin/media/{id}/usage
-    API->>DB: Check post references
-    DB-->>API: Usage information
-    API-->>UI: Image details + usage
-    UI->>A: Show image details
-    
-    opt Delete unused media
-        A->>UI: Delete image
-        UI->>API: DELETE /admin/media/{id}
-        API->>STORAGE: Remove files
-        API->>DB: Delete media record
-        DB-->>API: Deletion success
-        API-->>UI: Confirm deletion
     end
 ```
 
@@ -481,7 +338,7 @@ sequenceDiagram
     participant CDN as CDN Edge
     participant ORIGIN as Supabase Storage
     
-    B->>CDN: GET /media/{hash}?width=720
+    B->>CDN: GET /functions/v1/media-cdn/{hash}?width=720
     
     alt Image cached at edge
         CDN-->>B: Serve from edge cache

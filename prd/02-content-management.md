@@ -29,6 +29,7 @@
 4. Admin enters post title in title field
 5. Admin writes content in markdown editor
 6. Admin optionally uploads images via drag-and-drop
+7. Admin optionally designate an image as thumbnail by checking "As thumbnail" box which is displayed on the right top of the image when hover a mouse on the image or click it.
 7. Admin optionally adds references by selecting text
 8. Admin optionally sets post as draft using draft checkbox
 9. Admin clicks "Submit for Check" button
@@ -85,7 +86,7 @@ sequenceDiagram
     UI->>A: Show generated tags & abstract
     A->>UI: Review & click "Submit for sure"
     
-    UI->>API: POST /posts/publish
+    UI->>API: POST /functions/v1/post-manager
     API->>SUPA: Update post status to published
     SUPA-->>API: Published successfully
     API-->>UI: Redirect to published post
@@ -159,7 +160,7 @@ sequenceDiagram
     
     API-->>UI: Show updated content
     A->>UI: Submit for sure
-    UI->>API: PUT /posts/{id}
+    UI->>API: PATCH /functions/v1/post-manager
     API->>SUPA: Update post
     SUPA-->>API: Success
     API-->>UI: Redirect to updated post
@@ -221,7 +222,7 @@ sequenceDiagram
     participant STORAGE as Supabase Storage
     
     A->>UI: Upload image (drag/drop)
-    UI->>API: POST /media/upload
+    UI->>API: POST /functions/v1/image-processor
     API->>API: Validate file type & size
     API->>API: Generate filename hash
     
@@ -378,7 +379,8 @@ sequenceDiagram
     participant SUPA as Supabase
     
     A->>UI: Click "Submit for Check"
-    UI->>API: POST /ai/process-content
+    UI->>API: POST /functions/v1/ai-tag-generator
+    UI->>API: POST /functions/v1/ai-abstract-generator
     
     API->>CLAUDE: Send title + content
     CLAUDE->>CLAUDE: Analyze and generate tags + abstract
@@ -454,7 +456,7 @@ sequenceDiagram
     A->>UI: Click "Delete"
     UI->>A: Show confirmation dialog
     A->>UI: Confirm deletion ("Yes")
-    UI->>API: DELETE /posts/{id}
+    UI->>API: PATCH /rest/v1/post
     
     API->>SUPA: Update post status to 'deleted'
     API->>SUPA: Log deletion event

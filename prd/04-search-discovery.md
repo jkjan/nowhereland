@@ -69,7 +69,7 @@ sequenceDiagram
     
     U->>UI: Enter search query
     UI->>UI: Parse tags vs text
-    UI->>API: POST /search?q=query&tags=tag1,tag2
+    UI->>API: POST /functions/v1/search-handler?q=query&tags=tag1,tag2
     
     API->>OS: Query with boost for tags
     OS-->>API: Search results with scores
@@ -145,7 +145,7 @@ sequenceDiagram
     U->>UI: Click fixed tag button
     UI->>SEARCH: Add tag to search query
     SEARCH->>SEARCH: Convert to tag button with "x"
-    SEARCH->>API: GET /search?tags=dev
+    SEARCH->>API: GET /functions/v1/search-handler?tags=dev
     
     API->>DB: Query posts WHERE tags @> ['dev']
     DB-->>API: Posts with tag
@@ -155,7 +155,7 @@ sequenceDiagram
     opt Add another tag
         U->>UI: Click second tag
         UI->>SEARCH: Add to existing tags
-        SEARCH->>API: GET /search?tags=dev,beer
+        SEARCH->>API: GET /functions/v1/search-handler?tags=dev,beer
         API->>DB: Query posts WHERE tags @> ['dev','beer']
         DB-->>API: Posts with both tags
         API-->>SEARCH: Refined results

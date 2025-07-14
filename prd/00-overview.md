@@ -209,20 +209,18 @@ graph TB
 
 ## 📝 Documentation Structure
 
-```
 prd/
-├── 00-overview.md              # This document
-├── 01-user-management.md       # UC-UM-xxx use cases
-├── 02-content-management.md    # UC-CM-xxx use cases
-├── 03-ai-services.md          # UC-AI-xxx use cases
-├── 04-search-discovery.md     # UC-SD-xxx use cases
-├── 05-comment-system.md       # UC-CS-xxx use cases
-├── 06-media-management.md     # UC-MM-xxx use cases
-├── 07-analytics.md            # UC-AN-xxx use cases
-├── 08-admin-settings.md       # UC-AS-xxx use cases
-├── 09-security-policies.md    # Security framework
-└── 10-api-specifications.md   # Technical API details
-```
+@00-overview.md              # This document
+@01-user-management.md       # UC-UM-xxx use cases
+@02-content-management.md    # UC-CM-xxx use cases
+@03-ai-services.md          # UC-AI-xxx use cases
+@04-search-discovery.md     # UC-SD-xxx use cases
+@05-comment-management.md       # UC-CS-xxx use cases
+@06-media-management.md     # UC-MM-xxx use cases
+@07-analytics.md            # UC-AN-xxx use cases
+@08-admin-settings.md       # UC-AS-xxx use cases
+@09-security-policies.md    # Security framework
+@10-api-specifications.md   # Technical API details
 
 ## 🎯 Next Steps
 
