@@ -162,7 +162,7 @@ sequenceDiagram
 ### UC-UM-003: JWT Token Validation
 **ID**: UC-UM-003  
 **Name**: JWT Token Validation via API Gateway  
-**Actor**: System (AWS API Gateway)  
+**Actor**: System  
 **Trigger**: Any authenticated API request  
 **Goal**: Validate JWT token and authorize request  
 
@@ -173,7 +173,7 @@ sequenceDiagram
 
 **Main Flow**:
 1. Client sends request with Authorization: Bearer {jwt}
-2. AWS API Gateway intercepts request
+2. Supabase intercepts request
 3. API Gateway extracts JWT from Authorization header
 4. API Gateway fetches JWKS from Supabase endpoint
 5. API Gateway validates JWT signature using JWKS
@@ -206,7 +206,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant APIGW as AWS API Gateway
+    participant APIGW as Supabase
     participant JWKS as JWKS Endpoint
     participant SUPA as Supabase
     
@@ -232,8 +232,67 @@ sequenceDiagram
 
 ---
 
-### UC-UM-004: Token Refresh
+### UC-UM-004: User Login History Tracking
 **ID**: UC-UM-004  
+**Name**: Track User Login History  
+**Actor**: System  
+**Trigger**: Successful user login  
+**Goal**: Record login events for security monitoring and analytics  
+
+**Preconditions**:
+- User has successfully authenticated
+- User has approved status
+- Valid JWT token generated
+
+**Main Flow**:
+1. User completes successful login (UC-UM-002)
+2. System extracts login metadata (IP, user agent, timestamp)
+3. System creates login history record in database
+4. System stores: user_id, login_time, ip_address, user_agent, success status
+5. System checks for suspicious login patterns (optional)
+6. System purges login history older than 90 days (privacy compliance)
+7. Continue with normal login flow
+
+**Alternative Flows**:
+- **2a**: Unable to extract IP → Store as "unknown"
+- **3a**: Database write fails → Log error but continue login
+- **5a**: Suspicious pattern detected → Flag for admin review
+
+**Business Rules**:
+- Only successful logins are tracked (not failed attempts separately)
+- IP addresses stored in hashed format for privacy
+- Geographic location derived from IP (country/city only)
+- Login history viewable only by admin
+- Automatic cleanup after 90 days
+- Maximum 1000 login records per user
+
+**Security Requirements**:
+- IP address anonymization after 7 days
+- No storage of sensitive authentication data
+- Admin-only access to login history
+- Rate limiting on history queries
+
+**Authorization**: System operation
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant SYS as System
+    participant DB as Database
+    participant LOG as Login History
+    
+    U->>SYS: Successful login
+    SYS->>SYS: Extract metadata (IP, UA)
+    SYS->>LOG: Create login record
+    LOG->>DB: Store login_history
+    SYS->>SYS: Check login patterns
+    Note over SYS: Continue normal flow
+    
+    Note over LOG: Auto-cleanup after 90 days
+```
+
+### UC-UM-005: Token Refresh
+**ID**: UC-UM-005  
 **Name**: Refresh Access Token  
 **Actor**: Authenticated User  
 **Trigger**: Access token expires or near expiration  
@@ -464,7 +523,7 @@ sequenceDiagram
 - [ ] Successful login redirects appropriately
 
 ### UC-UM-003 (JWT Validation)
-- [ ] AWS API Gateway validates JWT signatures
+- [ ] Supabase validates JWT signatures
 - [ ] JWKS endpoint provides current public keys
 - [ ] Expired tokens rejected with 401
 - [ ] Unapproved users rejected with 403
@@ -510,5 +569,3 @@ sequenceDiagram
 2. **Supabase Integration**: Test user creation and authentication
 3. **JWKS Endpoint**: Test public key distribution and validation
 4. **Cross-Service Auth**: Test authentication across different services
-
-This authentication system provides secure user management with admin approval workflow while leveraging AWS API Gateway for JWT validation and Supabase for user storage and authentication.

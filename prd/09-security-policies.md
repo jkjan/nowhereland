@@ -194,6 +194,32 @@ graph TB
 - **XSS Prevention**: Content Security Policy enforced
 - **File Upload**: Magic number validation, virus scanning
 
+#### Content Security Policy (CSP)
+- **Purpose**: Prevent XSS attacks and code injection
+- **Implementation**: HTTP headers + meta tags
+- **Directives**: Whitelist trusted sources for scripts, styles, images
+- **Enforcement**: Report violations, block unauthorized resources
+
+```http
+Content-Security-Policy: 
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' vercel.live;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: blob: *.supabase.co;
+  connect-src 'self' *.supabase.co *.anthropic.com;
+  frame-src 'none';
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+```
+
+**CSP Security Benefits**:
+- Blocks malicious scripts in user comments
+- Prevents unauthorized iframe embedding
+- Stops data exfiltration via unauthorized connections
+- Protects against AI-generated content script injection
+- Provides violation reporting for security monitoring
+
 #### Data Validation Rules
 ```typescript
 // Example validation schema

@@ -22,12 +22,6 @@ The architecture diagram will be generated using the Python script in `/infrastr
 - **Hosting**: Vercel Free Tier
 - **Domain**: Custom domain with SSL
 
-### API Gateway & Orchestration
-- **Primary**: AWS API Gateway (REST API)
-- **Authentication**: JWT tokens with JWKS validation
-- **Rate Limiting**: AWS API Gateway throttling
-- **CORS**: Configured for Next.js domain
-
 ### Backend Services
 
 #### 1. Blog Service (Core)
@@ -69,10 +63,6 @@ The architecture diagram will be generated using the Python script in `/infrastr
 - **Includes**: 500MB database, 1GB storage, 5GB bandwidth
 - **Edge Functions**: 500K invocations/month
 - **Estimated Monthly Cost**: $0
-
-#### AWS API Gateway
-- **Usage**: REST API with ~100K requests/month
-- **Estimated Monthly Cost**: $1-2
 
 #### Tag + Abstract Generator
 - **Usage**: Tag + Abstract Generator with ~50K inv

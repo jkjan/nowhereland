@@ -49,9 +49,63 @@
 
 **Security Requirements**:
 - File type validation by magic numbers, not just extension
-- Virus scanning for uploaded files
+- MIME type whitelist enforcement
+- File size limits to prevent abuse
 - Access control via Supabase RLS policies
 - No executable file uploads allowed
+
+**File Validation Implementation**:
+```javascript
+// Basic file validation for personal blog
+const validateUploadedFile = (file) => {
+  // MIME type whitelist
+  const allowedTypes = [
+    'image/jpeg', 'image/jpg', 'image/png', 
+    'image/gif', 'image/webp'
+  ];
+  
+  // Size limit (5MB)
+  const maxSize = 5 * 1024 * 1024;
+  
+  // Basic validation
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error('Invalid file type. Only images allowed.');
+  }
+  
+  if (file.size > maxSize) {
+    throw new Error('File too large. Maximum size is 5MB.');
+  }
+  
+  return true;
+};
+
+// Magic number validation (Edge Function)
+const validateMagicNumbers = (buffer) => {
+  const magicNumbers = {
+    'jpeg': [0xFF, 0xD8, 0xFF],
+    'png': [0x89, 0x50, 0x4E, 0x47],
+    'gif': [0x47, 0x49, 0x46],
+    'webp': [0x52, 0x49, 0x46, 0x46]
+  };
+  
+  const header = new Uint8Array(buffer.slice(0, 8));
+  
+  for (const [type, signature] of Object.entries(magicNumbers)) {
+    if (signature.every((byte, i) => header[i] === byte)) {
+      return type;
+    }
+  }
+  
+  throw new Error('File signature does not match expected image format');
+};
+```
+
+**Validation Benefits**:
+- Prevents malicious file uploads (`.exe` disguised as `.jpg`)
+- Stops file type spoofing attacks
+- Ensures storage efficiency with size limits
+- Simple implementation for personal blog use case
+- No complex infrastructure needed
 
 **Authorization**: Admin
 
