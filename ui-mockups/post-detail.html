@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building a Personal Blog with Next.js and Supabase - Nowhere Land</title>
+    <meta name="description" content="Exploring the journey of creating a personal blog platform using modern web technologies.">
+    <meta property="og:title" content="Building a Personal Blog with Next.js and Supabase">
+    <meta property="og:description" content="Exploring the journey of creating a personal blog platform using modern web technologies.">
+    <meta property="og:type" content="article">
+    <style>
+        /* Include base styles */
+        :root {
+            --radius: 0.5rem;
+            --neutral: #A7A8AA;
+            
+            /* Light Theme */
+            --primary-light: #f1f0ed;
+            --secondary-light: #2D2926;
+            --accent-light: #D01C1F;
+            
+            /* Dark Theme */
+            --primary-dark: #2D2926;
+            --secondary-dark: #f1f0ed;
+            --accent-dark: #FF8200;
+        }
+
+        [data-theme="light"] {
+            --primary: var(--primary-light);
+            --secondary: var(--secondary-light);
+            --accent: var(--accent-light);
+        }
+
+        [data-theme="dark"] {
+            --primary: var(--primary-dark);
+            --secondary: var(--secondary-dark);
+            --accent: var(--accent-dark);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: var(--primary-dark);
+                --secondary: var(--secondary-dark);
+                --accent: var(--accent-dark);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --primary: var(--primary-light);
+                --secondary: var(--secondary-light);
+                --accent: var(--accent-light);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--primary);
+            color: var(--secondary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        @media (min-width: 1024px) {
+            .grid-lg-12 { grid-template-columns: repeat(12, 1fr); }
+            .col-lg-2 { grid-column: span 2; }
+            .col-lg-8 { grid-column: span 8; }
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .grid-md-8 { grid-template-columns: repeat(8, 1fr); }
+            .col-md-2 { grid-column: span 2; }
+            .col-md-6 { grid-column: span 6; }
+        }
+
+        @media (max-width: 767px) {
+            .grid-sm-4 { grid-template-columns: repeat(4, 1fr); }
+            .col-sm-4 { grid-column: span 4; }
+        }
+
+        .container-box {
+            background-color: var(--neutral);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .component-box {
+            background-color: var(--primary);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .component-box:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: var(--primary);
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-neutral {
+            background-color: var(--neutral);
+            color: var(--secondary);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--secondary);
+        }
+
+        .btn-ghost:hover {
+            background-color: var(--neutral);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--primary);
+            border-bottom: 1px solid var(--neutral);
+        }
+
+        .header-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            align-items: center;
+            padding: 1rem 0;
+            gap: 1rem;
+        }
+
+        @media (max-width: 767px) {
+            .header-content {
+                grid-template-columns: 2fr 1fr;
+            }
+            .theme-toggle {
+                display: none;
+            }
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .header-nav {
+            justify-self: end;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* TOC */
+        .toc {
+            background-color: var(--neutral);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .toc h3 {
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .toc-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc-list a {
+            color: var(--secondary);
+            text-decoration: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius);
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .toc-list a:hover,
+        .toc-list a.active {
+            background-color: var(--accent);
+            color: var(--primary);
+        }
+
+        .toc-list .toc-h2 {
+            padding-left: 0;
+        }
+
+        .toc-list .toc-h3 {
+            padding-left: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .toc-toggle {
+            display: none;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 767px) {
+            .toc {
+                position: static;
+                margin-bottom: 2rem;
+            }
+            
+            .toc-toggle {
+                display: block;
+            }
+            
+            .toc-content {
+                display: none;
+            }
+            
+            .toc-content.expanded {
+                display: block;
+            }
+        }
+
+        /* Post Header */
+        .post-header {
+            margin-bottom: 2rem;
+        }
+
+        .post-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .post-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+            opacity: 0.7;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 767px) {
+            .post-title {
+                font-size: 2rem;
+            }
+        }
+
+        /* Post Content */
+        .post-content {
+            font-size: 1.125rem;
+            line-height: 1.8;
+        }
+
+        .post-content h2 {
+            font-size: 1.875rem;
+            margin: 2rem 0 1rem 0;
+            scroll-margin-top: 100px;
+        }
+
+        .post-content h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.75rem 0;
+            scroll-margin-top: 100px;
+        }
+
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+
+        .post-content code {
+            background-color: var(--neutral);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .post-content pre {
+            background-color: var(--neutral);
+            padding: 1rem;
+            border-radius: var(--radius);
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .post-content blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+
+        /* References */
+        .reference-highlight {
+            background-color: var(--accent);
+            color: var(--primary);
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .reference-highlight:hover {
+            opacity: 0.8;
+        }
+
+        .reference-blink {
+            animation: blink 0.5s ease-in-out 2;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .reference-list {
+            margin-top: 2rem;
+        }
+
+        .reference-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+        }
+
+        .reference-number {
+            background-color: var(--accent);
+            color: var(--primary);
+            min-width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .reference-text {
+            flex: 1;
+        }
+
+        .reference-text a {
+            color: var(--accent);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--accent);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            margin: 0.25rem;
+        }
+
+        .tags-section {
+            margin: 2rem 0;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background-color: var(--neutral);
+            margin: 2rem 0;
+        }
+
+        /* Comments */
+        .comments-section {
+            margin-top: 3rem;
+        }
+
+        .comment-form {
+            background-color: var(--neutral);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 767px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--primary);
+            border-radius: var(--radius);
+            background-color: var(--primary);
+            color: var(--secondary);
+            font-size: 1rem;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .comment-item {
+            background-color: var(--neutral);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .comment-author {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .comment-date {
+            color: var(--secondary);
+            opacity: 0.7;
+            font-size: 0.875rem;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .comment-content {
+            color: var(--secondary);
+            line-height: 1.6;
+        }
+
+        /* Related Posts */
+        .related-posts {
+            margin-top: 3rem;
+        }
+
+        .related-posts h3 {
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .related-post-item {
+            display: block;
+            background-color: var(--neutral);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease;
+        }
+
+        .related-post-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .related-post-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .related-post-summary {
+            color: var(--secondary);
+            opacity: 0.8;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .pagination button {
+            background-color: var(--neutral);
+            color: var(--secondary);
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+        }
+
+        .pagination button:hover {
+            background-color: var(--accent);
+            color: var(--primary);
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 1rem; }
+        .flex { display: flex; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 1rem; }
+    </style>
+</head>
+<body data-theme="light">
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">Nowhere Land</a>
+                <div class="theme-toggle">
+                    <button class="btn-ghost" onclick="toggleTheme()">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                </div>
+                <nav class="header-nav">
+                    <a href="/admin" class="btn-ghost">Admin</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="grid grid-lg-12 grid-md-8 grid-sm-4" style="margin-top: 2rem;">
+            <!-- Table of Contents -->
+            <aside class="col-lg-2 col-md-2 col-sm-4">
+                <div class="toc">
+                    <button class="btn-ghost toc-toggle" onclick="toggleTOC()">Table of Contents</button>
+                    <div class="toc-content">
+                        <h3>Contents</h3>
+                        <ul class="toc-list">
+                            <li><a href="#introduction" class="toc-h2">Introduction</a></li>
+                            <li><a href="#architecture" class="toc-h2 active">Architecture Overview</a></li>
+                            <li><a href="#tech-stack" class="toc-h3">Technology Stack</a></li>
+                            <li><a href="#database-design" class="toc-h3">Database Design</a></li>
+                            <li><a href="#implementation" class="toc-h2">Implementation Details</a></li>
+                            <li><a href="#frontend" class="toc-h3">Frontend Development</a></li>
+                            <li><a href="#backend" class="toc-h3">Backend Services</a></li>
+                            <li><a href="#deployment" class="toc-h2">Deployment & CI/CD</a></li>
+                            <li><a href="#conclusion" class="toc-h2">Conclusion</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Post Content -->
+            <article class="col-lg-8 col-md-6 col-sm-4">
+                <div class="container-box">
+                    <!-- Post Header -->
+                    <header class="component-box post-header">
+                        <h1 class="post-title">Building a Personal Blog with Next.js and Supabase</h1>
+                        <div class="post-meta">
+                            <span>Published on December 15, 2024</span>
+                            <span>1,247 views • 8 min read</span>
+                        </div>
+                        <div class="post-actions">
+                            <button class="btn-ghost btn-sm">📄 Print</button>
+                            <button class="btn-ghost btn-sm">🔗 Share</button>
+                            <button class="btn btn-sm">✏️ Edit</button>
+                            <button class="btn-neutral btn-sm">🗑️ Delete</button>
+                        </div>
+                    </header>
+
+                    <!-- Abstract -->
+                    <div class="component-box">
+                        <p><strong>Abstract:</strong> Exploring the journey of creating a personal blog platform using modern web technologies. This post covers the architecture decisions, design philosophy, and implementation details of building a simple yet powerful blogging platform that reflects personal thoughts and ideas.</p>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="component-box tags-section">
+                        <span class="tag">dev</span>
+                        <span class="tag">nextjs</span>
+                        <span class="tag">typescript</span>
+                        <span class="tag">supabase</span>
+                        <span class="tag">web development</span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Main Content -->
+                    <div class="component-box post-content">
+                        <h2 id="introduction">Introduction</h2>
+                        <p>Building a personal blog has always been a rite of passage for developers. It's a chance to create something that truly represents you, while also <span class="reference-highlight" onclick="scrollToReference(1)">experimenting with new technologies and approaches</span>. In this post, I'll walk you through my journey of creating "Nowhere Land" – a personal blog that aims to be an incarnation of myself on the internet.</p>
+
+                        <h2 id="architecture">Architecture Overview</h2>
+                        <p>The architecture follows a modern microservices approach, designed to handle a modest scale of 100 DAU and 1000 MAU. The goal was to create something scalable without over-engineering for day one.</p>
+
+                        <h3 id="tech-stack">Technology Stack</h3>
+                        <p>After careful consideration, I settled on the following stack:</p>
+                        <ul>
+                            <li><strong>Frontend:</strong> Next.js 14 with TypeScript</li>
+                            <li><strong>Styling:</strong> Tailwind CSS with shadcn/ui components</li>
+                            <li><strong>Backend:</strong> Supabase for database and authentication</li>
+                            <li><strong>Image CDN:</strong> Supabase Edge Functions</li>
+                            <li><strong>Search:</strong> OpenSearch for full-text search capabilities</li>
+                            <li><strong>Deployment:</strong> Vercel for frontend, AWS for infrastructure</li>
+                        </ul>
+
+                        <h3 id="database-design">Database Design</h3>
+                        <p>The database schema follows a normalized approach, avoiding JSON columns and array types for better query performance. <span class="reference-highlight" onclick="scrollToReference(2)">The design prioritizes referential integrity and clean separation of concerns</span>.</p>
+
+                        <blockquote>
+                            <p>"Simplicity is the ultimate sophistication." – This philosophy guided every architectural decision in the project.</p>
+                        </blockquote>
+
+                        <h2 id="implementation">Implementation Details</h2>
+                        <p>The implementation follows Feature-Sliced Design (FSD) principles, organizing code into shared, entities, features, widgets, and pages layers.</p>
+
+                        <h3 id="frontend">Frontend Development</h3>
+                        <p>The frontend uses Next.js 14 with the new App Router, providing excellent performance and SEO capabilities. The design system is built on top of shadcn/ui components, ensuring consistency across the application.</p>
+
+                        <pre><code>// Example of a reusable component
+import { Button } from '@/shared/ui/button'
+import { Card } from '@/shared/ui/card'
+
+export function PostCard({ post }: { post: Post }) {
+  return (
+    &lt;Card className="p-6"&gt;
+      &lt;h3 className="text-xl font-bold"&gt;{post.title}&lt;/h3&gt;
+      &lt;p className="text-muted-foreground"&gt;{post.abstract}&lt;/p&gt;
+      &lt;Button asChild&gt;
+        &lt;Link href={`/post/${post.id}`}&gt;Read More&lt;/Link&gt;
+      &lt;/Button&gt;
+    &lt;/Card&gt;
+  )
+}</code></pre>
+
+                        <h3 id="backend">Backend Services</h3>
+                        <p>Supabase handles most of the backend functionality through its PostgreSQL database and auto-generated APIs. <span class="reference-highlight" onclick="scrollToReference(3)">Row Level Security (RLS) policies ensure proper authorization at the database level</span>.</p>
+
+                        <h2 id="deployment">Deployment & CI/CD</h2>
+                        <p>The deployment strategy uses Vercel for the frontend and AWS for additional infrastructure. GitHub Actions orchestrates the CI/CD pipeline, ensuring every deployment is tested and validated.</p>
+
+                        <h2 id="conclusion">Conclusion</h2>
+                        <p>Building "Nowhere Land" has been a rewarding journey of combining modern web technologies with thoughtful design. The result is a platform that not only serves as a personal blog but also as a reflection of my approach to software development.</p>
+
+                        <p>The key takeaways from this project include the importance of starting simple, choosing the right tools for the scale, and always keeping the user experience at the forefront of design decisions.</p>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- References -->
+                    <div class="component-box">
+                        <h3>References</h3>
+                        <div class="reference-list">
+                            <div class="reference-item" onclick="scrollToReference(1)">
+                                <span class="reference-number">1</span>
+                                <span class="reference-text">Dan Abramov - "Things I Don't Know as of 2018" - <a href="https://overreacted.io/things-i-dont-know-as-of-2018/" target="_blank">https://overreacted.io/things-i-dont-know-as-of-2018/</a></span>
+                            </div>
+                            <div class="reference-item" onclick="scrollToReference(2)">
+                                <span class="reference-number">2</span>
+                                <span class="reference-text">PostgreSQL Documentation - Database Design Best Practices</span>
+                            </div>
+                            <div class="reference-item" onclick="scrollToReference(3)">
+                                <span class="reference-number">3</span>
+                                <span class="reference-text">Supabase Documentation - Row Level Security</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <section class="comments-section">
+                    <h3 class="mb-2">Comments (3)</h3>
+                    
+                    <!-- Comment Form -->
+                    <form class="comment-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" class="form-input" placeholder="Nickname" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" class="form-input" placeholder="Password" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-textarea" placeholder="Leave a comment..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Post Comment</button>
+                    </form>
+
+                    <!-- Comments List -->
+                    <div class="comments-list">
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-author">DevEnthusiast</span>
+                                <div class="flex gap-2">
+                                    <span class="comment-date">2 hours ago</span>
+                                    <div class="comment-actions">
+                                        <button class="btn-ghost btn-sm">Edit</button>
+                                        <button class="btn-ghost btn-sm">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                <p>Great article! I've been considering a similar architecture for my own blog. How do you handle the search indexing with OpenSearch? Do you use webhooks from Supabase?</p>
+                            </div>
+                        </div>
+
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-author">TechReviewer</span>
+                                <div class="flex gap-2">
+                                    <span class="comment-date">1 day ago</span>
+                                    <div class="comment-actions">
+                                        <button class="btn-ghost btn-sm">Edit</button>
+                                        <button class="btn-ghost btn-sm">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                <p>The reference system looks interesting. I like how you can click between the text and references. Did you implement this yourself or use a library?</p>
+                            </div>
+                        </div>
+
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-author">BlogReader</span>
+                                <div class="flex gap-2">
+                                    <span class="comment-date">2 days ago</span>
+                                    <div class="comment-actions">
+                                        <button class="btn-ghost btn-sm">Edit</button>
+                                        <button class="btn-ghost btn-sm">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                <p>Love the clean design! The dark mode implementation is smooth. Looking forward to reading more posts about your development journey.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination">
+                        <button>← Previous</button>
+                        <button>Next →</button>
+                    </div>
+                </section>
+
+                <!-- Related Posts -->
+                <section class="related-posts">
+                    <div class="container-box">
+                        <h3>Related Posts</h3>
+                        <a href="/post/view/xyz789" class="related-post-item">
+                            <div class="related-post-title">TypeScript Best Practices for Large Scale Applications</div>
+                            <div class="related-post-summary">A deep dive into TypeScript patterns and practices that scale well in enterprise applications...</div>
+                        </a>
+                        <a href="/post/view/abc456" class="related-post-item">
+                            <div class="related-post-title">Deploying Next.js Applications on Vercel</div>
+                            <div class="related-post-summary">Complete guide to deploying and optimizing Next.js applications on Vercel platform...</div>
+                        </a>
+                        <a href="/post/view/def123" class="related-post-item">
+                            <div class="related-post-title">Database Design Patterns for Modern Web Apps</div>
+                            <div class="related-post-summary">Exploring different database design patterns and when to use them in web applications...</div>
+                        </a>
+                    </div>
+                </section>
+            </article>
+        </div>
+    </main>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const currentTheme = body.getAttribute('data-theme');
+            
+            if (currentTheme === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemTheme;
+            
+            document.body.setAttribute('data-theme', theme);
+            document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function toggleTOC() {
+            const tocContent = document.querySelector('.toc-content');
+            tocContent.classList.toggle('expanded');
+        }
+
+        function scrollToReference(refNumber) {
+            const highlights = document.querySelectorAll('.reference-highlight');
+            const target = highlights[refNumber - 1];
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('reference-blink');
+                setTimeout(() => {
+                    target.classList.remove('reference-blink');
+                }, 1000);
+            }
+        }
+
+        // TOC active item tracking
+        function updateActiveTOCItem() {
+            const headers = document.querySelectorAll('h2, h3');
+            const tocLinks = document.querySelectorAll('.toc-list a');
+            
+            let activeHeader = null;
+            headers.forEach(header => {
+                const rect = header.getBoundingClientRect();
+                if (rect.top <= 120 && rect.bottom >= 120) {
+                    activeHeader = header;
+                }
+            });
+            
+            tocLinks.forEach(link => link.classList.remove('active'));
+            if (activeHeader) {
+                const activeLink = document.querySelector(`a[href="#${activeHeader.id}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+        }
+
+        // Track view time and scroll
+        let startTime = Date.now();
+        let maxScroll = 0;
+
+        function trackViewData() {
+            const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+            maxScroll = Math.max(maxScroll, scrollPercent);
+        }
+
+        window.addEventListener('scroll', () => {
+            updateActiveTOCItem();
+            trackViewData();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            const dwellTime = Date.now() - startTime;
+            // In real implementation, send analytics data to server
+            console.log('Dwell time:', dwellTime, 'Max scroll:', maxScroll);
+        });
+
+        document.addEventListener('DOMContentLoaded', initTheme);
+    </script>
+</body>
+</html>

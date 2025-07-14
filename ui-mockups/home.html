@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nowhere Land - Home</title>
+    <style>
+        /* Include base styles from base.html */
+        /* CSS Custom Properties for Theme */
+        :root {
+            --radius: 0.5rem;
+            --neutral: #A7A8AA;
+            
+            /* Light Theme */
+            --primary-light: #f1f0ed;
+            --secondary-light: #2D2926;
+            --accent-light: #D01C1F;
+            
+            /* Dark Theme */
+            --primary-dark: #2D2926;
+            --secondary-dark: #f1f0ed;
+            --accent-dark: #FF8200;
+        }
+
+        /* Default Light Theme */
+        [data-theme="light"] {
+            --primary: var(--primary-light);
+            --secondary: var(--secondary-light);
+            --accent: var(--accent-light);
+        }
+
+        /* Dark Theme */
+        [data-theme="dark"] {
+            --primary: var(--primary-dark);
+            --secondary: var(--secondary-dark);
+            --accent: var(--accent-dark);
+        }
+
+        /* Auto Theme Detection */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: var(--primary-dark);
+                --secondary: var(--secondary-dark);
+                --accent: var(--accent-dark);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --primary: var(--primary-light);
+                --secondary: var(--secondary-light);
+                --accent: var(--accent-light);
+            }
+        }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--primary);
+            color: var(--secondary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Grid System - 12-8-4 */
+        .container {
+            max-width: 1280px; /* 7xl */
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        /* Large screens (lg) - 12 columns */
+        @media (min-width: 1024px) {
+            .grid-lg-12 { grid-template-columns: repeat(12, 1fr); }
+            .col-lg-1 { grid-column: span 1; }
+            .col-lg-2 { grid-column: span 2; }
+            .col-lg-4 { grid-column: span 4; }
+            .col-lg-6 { grid-column: span 6; }
+            .col-lg-8 { grid-column: span 8; }
+            .col-lg-10 { grid-column: span 10; }
+        }
+
+        /* Medium screens (md) - 8 columns */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .grid-md-8 { grid-template-columns: repeat(8, 1fr); }
+            .col-md-2 { grid-column: span 2; }
+            .col-md-4 { grid-column: span 4; }
+            .col-md-6 { grid-column: span 6; }
+            .col-md-8 { grid-column: span 8; }
+        }
+
+        /* Small screens (sm) - 4 columns */
+        @media (max-width: 767px) {
+            .grid-sm-4 { grid-template-columns: repeat(4, 1fr); }
+            .col-sm-1 { grid-column: span 1; }
+            .col-sm-4 { grid-column: span 4; }
+        }
+
+        /* Common Components */
+        .container-box {
+            background-color: var(--neutral);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .component-box {
+            background-color: var(--primary);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .component-box:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--accent);
+            color: var(--primary);
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-neutral {
+            background-color: var(--neutral);
+            color: var(--secondary);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--secondary);
+        }
+
+        .btn-ghost:hover {
+            background-color: var(--neutral);
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--primary);
+            border-bottom: 1px solid var(--neutral);
+            transition: all 0.3s ease;
+        }
+
+        .header-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            align-items: center;
+            padding: 1rem 0;
+            gap: 1rem;
+        }
+
+        @media (max-width: 767px) {
+            .header-content {
+                grid-template-columns: 2fr 1fr;
+            }
+            .theme-toggle {
+                display: none;
+            }
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .header-nav {
+            justify-self: end;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .notification-badge {
+            position: relative;
+        }
+
+        .notification-badge::after {
+            content: "3";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--accent);
+            color: var(--primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        /* Search Bar */
+        .search-section {
+            position: sticky;
+            top: 80px;
+            z-index: 90;
+            background-color: var(--primary);
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem;
+            padding-right: 3rem;
+            border: 2px solid var(--neutral);
+            border-radius: var(--radius);
+            background-color: var(--primary);
+            color: var(--secondary);
+            font-size: 1rem;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--neutral);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--accent);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            margin: 0.25rem;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .tag:hover {
+            opacity: 0.9;
+        }
+
+        .tag-remove {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Fixed Tags Sidebar */
+        .fixed-tags {
+            background-color: var(--neutral);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 200px;
+        }
+
+        .fixed-tags h3 {
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .fixed-tags-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 767px) {
+            .fixed-tags {
+                position: static;
+                margin-bottom: 2rem;
+            }
+            
+            .fixed-tags-list {
+                flex-direction: row;
+                overflow-x: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .fixed-tags-list::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        /* Post List */
+        .post-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .post-item {
+            background-color: var(--neutral);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .post-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-content {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .post-thumbnail {
+            width: 120px;
+            height: 120px;
+            border-radius: var(--radius);
+            object-fit: cover;
+            background-color: var(--primary);
+        }
+
+        @media (max-width: 767px) {
+            .post-thumbnail {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        .post-details h3 {
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+            font-size: 1.25rem;
+        }
+
+        .post-details p {
+            color: var(--secondary);
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 3rem;
+        }
+
+        .pagination button {
+            background-color: var(--neutral);
+            color: var(--secondary);
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination button:hover {
+            background-color: var(--accent);
+            color: var(--primary);
+        }
+
+        .pagination button.active {
+            background-color: var(--accent);
+            color: var(--primary);
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-4 { margin-bottom: 2rem; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-4 { margin-top: 2rem; }
+        .hidden { display: none; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 1rem; }
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+    </style>
+</head>
+<body data-theme="light">
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">Nowhere Land</a>
+                <div class="theme-toggle">
+                    <button class="btn-ghost" onclick="toggleTheme()">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                </div>
+                <nav class="header-nav">
+                    <a href="/about-me" class="btn-ghost notification-badge">About Me</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="grid grid-lg-12 grid-md-8 grid-sm-4">
+                <div class="col-lg-10 col-md-8 col-sm-4">
+                    <div class="search-container">
+                        <input type="text" class="search-input" placeholder="Search posts or use #tags..." value="#dev typescript">
+                        <button class="search-clear">×</button>
+                    </div>
+                    <!-- Active search tags -->
+                    <div class="mt-2">
+                        <span class="tag">dev <button class="tag-remove">×</button></span>
+                        <span class="tag">typescript <button class="tag-remove">×</button></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-lg-12 grid-md-8 grid-sm-4">
+            <!-- Fixed Tags Sidebar -->
+            <aside class="col-lg-2 col-md-2 col-sm-4">
+                <div class="fixed-tags">
+                    <h3>Topics</h3>
+                    <div class="fixed-tags-list">
+                        <button class="tag" onclick="addTag('dev')">dev</button>
+                        <button class="tag" onclick="addTag('beer')">beer</button>
+                        <button class="tag" onclick="addTag('life')">life</button>
+                        <button class="tag" onclick="addTag('travel')">travel</button>
+                        <button class="tag" onclick="addTag('music')">music</button>
+                        <button class="tag" onclick="addTag('books')">books</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Post List -->
+            <section class="col-lg-8 col-md-6 col-sm-4">
+                <div class="post-list">
+                    <!-- Post Item 1 -->
+                    <article class="post-item">
+                        <div class="post-content">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjREQxQzFGIi8+Cjx0ZXh0IHg9IjYwIiB5PSI2NSIgZmlsbD0iI0YxRjBFRCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkRldjwvdGV4dD4KPHN2Zz4K" alt="Dev thumbnail" class="post-thumbnail">
+                            <div class="post-details">
+                                <h3>Building a Personal Blog with Next.js and Supabase</h3>
+                                <p>Exploring the journey of creating a personal blog platform using modern web technologies. This post covers the architecture decisions, design philosophy, and implementation details of building a simple yet powerful blogging platform that reflects personal thoughts and ideas.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Post Item 2 -->
+                    <article class="post-item">
+                        <div class="post-content">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjRkY4MjAwIi8+Cjx0ZXh0IHg9IjYwIiB5PSI2NSIgZmlsbD0iIzJEMjkyNiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJlZXI8L3RleHQ+CjwvIyB2Zz4K" alt="Beer thumbnail" class="post-thumbnail">
+                            <div class="post-details">
+                                <h3>The Art of Craft Beer: A Journey Through Local Breweries</h3>
+                                <p>Discovering the rich flavors and stories behind local craft beers. From hoppy IPAs to smooth stouts, this exploration takes you through the passionate world of craft brewing and the communities that make it special.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Post Item 3 -->
+                    <article class="post-item">
+                        <div class="post-content">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjQTdBOEFBIi8+Cjx0ZXh0IHg9IjYwIiB5PSI2NSIgZmlsbD0iIzJEMjkyNiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxpZmU8L3RleHQ+Cjwvc3ZnPgo=" alt="Life thumbnail" class="post-thumbnail">
+                            <div class="post-details">
+                                <h3>Reflections on Remote Work and Digital Nomadism</h3>
+                                <p>Thoughts on the changing nature of work in the digital age. How remote work has transformed not just our professional lives, but our personal relationships, travel habits, and overall life philosophy.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Post Item 4 -->
+                    <article class="post-item">
+                        <div class="post-content">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjREQxQzFGIi8+Cjx0ZXh0IHg9IjYwIiB5PSI1NSIgZmlsbD0iI0YxRjBFRCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlR5cGVTY3JpcHQ8L3RleHQ+Cjx0ZXh0IHg9IjYwIiB5PSI3NSIgZmlsbD0iI0YxRjBFRCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkRldjwvdGV4dD4KPHN2Zz4K" alt="TypeScript thumbnail" class="post-thumbnail">
+                            <div class="post-details">
+                                <h3>TypeScript Best Practices for Large Scale Applications</h3>
+                                <p>A deep dive into TypeScript patterns and practices that scale well in enterprise applications. Covering advanced types, modular architecture, and strategies for maintaining type safety across large codebases.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Post Item 5 -->
+                    <article class="post-item">
+                        <div class="post-content">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjRkY4MjAwIi8+Cjx0ZXh0IHg9IjYwIiB5PSI2NSIgZmlsbD0iIzJEMjkyNiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlRyYXZlbDwvdGV4dD4KPHN2Zz4K" alt="Travel thumbnail" class="post-thumbnail">
+                            <div class="post-details">
+                                <h3>Hidden Gems of Seoul: A Developer's Guide to the City</h3>
+                                <p>Exploring Seoul through the eyes of a developer. From the best coffee shops for coding sessions to tech meetups and coworking spaces, this guide covers the intersection of technology and urban culture in Korea's capital.</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button>← Previous</button>
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button>Next →</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const currentTheme = body.getAttribute('data-theme');
+            
+            if (currentTheme === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Initialize theme from localStorage or system preference
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemTheme;
+            
+            document.body.setAttribute('data-theme', theme);
+            document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Add tag to search
+        function addTag(tagName) {
+            const searchInput = document.querySelector('.search-input');
+            const currentValue = searchInput.value;
+            const tagToAdd = `#${tagName}`;
+            
+            if (!currentValue.includes(tagToAdd)) {
+                searchInput.value = currentValue ? `${currentValue} ${tagToAdd}` : tagToAdd;
+                updateActiveTags();
+            }
+        }
+
+        // Update active tags display
+        function updateActiveTags() {
+            // This would be implemented with proper tag parsing logic
+            console.log('Updating active tags...');
+        }
+
+        // Clear search
+        document.querySelector('.search-clear').addEventListener('click', () => {
+            document.querySelector('.search-input').value = '';
+            updateActiveTags();
+        });
+
+        // Header shrink on scroll
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > 100) {
+                header.classList.add('shrunk');
+            } else {
+                header.classList.remove('shrunk');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+
+        // Post item click handlers
+        document.querySelectorAll('.post-item').forEach(item => {
+            item.addEventListener('click', () => {
+                window.location.href = '/post/view/abc123def456';
+            });
+        });
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', initTheme);
+    </script>
+</body>
+</html>
