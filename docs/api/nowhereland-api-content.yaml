@@ -1,0 +1,532 @@
+openapi: 3.0.3
+info:
+  title: Nowhere Land Blog API - Content Management Domain
+  description: Blog post, reference, and table of contents management
+  version: 1.0.0
+  contact:
+    name: Kyojun Jin
+    email: jan@nowhereland.com
+
+servers:
+  - url: https://your-project.supabase.co
+    description: Supabase production server
+  - url: https://your-dev-project.supabase.co
+    description: Supabase development server
+
+security:
+  - JWTAuth: []
+
+paths:
+  # =================================================================
+  # POST MANAGEMENT (PostgREST for read/delete, Edge Functions for create/update)
+  # =================================================================
+  /rest/v1/post:
+    get:
+      tags: [Posts]
+      summary: Get posts with embedded references and toc
+      description: Retrieve blog posts with related data using PostgREST
+      security: []
+      parameters:
+        - name: select
+          in: query
+          schema:
+            type: string
+          example: "id,title,content,abstract,thumbnail_hash,view_count,published_at,created_at,reference!inner(*),toc_entry!inner(*)"
+          description: "PostgREST select with embedded resources"
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/StatusParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/IsDeletedParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/OrderParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/LimitParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/OffsetParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/RangeHeader'
+      responses:
+        '200':
+          description: Posts with embedded references and toc
+          headers:
+            Content-Range:
+              schema:
+                type: string
+              example: "0-9/100"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './nowhereland-api-components.yaml#/components/schemas/PostWithDetails'
+        '206':
+          description: Partial content (when using range)
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+
+    patch:
+      tags: [Posts]
+      summary: Soft delete post (Admin only)
+      description: Mark post as deleted (soft delete) - sets is_deleted=true
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Post ID to delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [is_deleted]
+              properties:
+                is_deleted:
+                  type: boolean
+                  enum: [true]
+                  description: "Set to true for soft delete"
+      responses:
+        '200':
+          description: Post soft deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+  # Post management via Edge Function (create/update with references + indexing)
+  /functions/v1/post-manager:
+    post:
+      tags: [Posts]
+      summary: Create post with references, toc, and search indexing (Admin only)
+      description: Create new blog post with all related data and trigger search indexing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, content]
+              properties:
+                title:
+                  type: string
+                  maxLength: 255
+                  description: Post title
+                content:
+                  type: string
+                  description: Post content in markdown
+                abstract:
+                  type: string
+                  description: Post summary/abstract
+                thumbnail_hash:
+                  type: string
+                  maxLength: 64
+                  description: Hash of thumbnail image
+                status:
+                  type: string
+                  enum: [draft, published, archived]
+                  default: draft
+                  description: Post publication status
+                references:
+                  type: array
+                  description: Post references with position data
+                  items:
+                    type: object
+                    required: [text, sequence_number, start_position, end_position]
+                    properties:
+                      text:
+                        type: string
+                        description: Reference text or citation
+                      url:
+                        type: string
+                        format: uri
+                        nullable: true
+                        description: Reference URL (optional)
+                      sequence_number:
+                        type: integer
+                        minimum: 1
+                        description: Reference order number
+                      start_position:
+                        type: integer
+                        minimum: 0
+                        description: Start character position in content
+                      end_position:
+                        type: integer
+                        minimum: 0
+                        description: End character position in content
+                toc_entries:
+                  type: array
+                  description: Table of contents entries
+                  items:
+                    type: object
+                    required: [level, title, anchor, position_in_content]
+                    properties:
+                      level:
+                        type: integer
+                        minimum: 1
+                        maximum: 6
+                        description: Heading level (H1-H6)
+                      title:
+                        type: string
+                        maxLength: 255
+                        description: Heading text
+                      anchor:
+                        type: string
+                        maxLength: 255
+                        description: URL anchor/slug
+                      position_in_content:
+                        type: integer
+                        minimum: 0
+                        description: Character position in content
+              example:
+                title: "My First Blog Post"
+                content: "# Introduction\n\nThis is my first blog post..."
+                abstract: "An introduction to my personal blog"
+                status: "published"
+                references:
+                  - text: "MDN Web Docs"
+                    url: "https://developer.mozilla.org"
+                    sequence_number: 1
+                    start_position: 150
+                    end_position: 162
+                toc_entries:
+                  - level: 1
+                    title: "Introduction"
+                    anchor: "introduction"
+                    position_in_content: 0
+      responses:
+        '201':
+          description: Post created and indexed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post_id:
+                    type: string
+                    description: Created post ID
+                  indexed:
+                    type: boolean
+                    description: Whether post was indexed for search
+                  references_created:
+                    type: integer
+                    description: Number of references created
+                  toc_entries_created:
+                    type: integer
+                    description: Number of TOC entries created
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+    patch:
+      tags: [Posts]
+      summary: Update post with references, toc, and re-index (Admin only)
+      description: Update existing post with all related data and re-trigger search indexing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [post_id]
+              properties:
+                post_id:
+                  type: string
+                  description: ID of post to update
+                title:
+                  type: string
+                  maxLength: 255
+                content:
+                  type: string
+                abstract:
+                  type: string
+                thumbnail_hash:
+                  type: string
+                  maxLength: 64
+                status:
+                  type: string
+                  enum: [draft, published, archived]
+                references:
+                  type: array
+                  description: Updated references (replaces all existing)
+                  items:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                      url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      sequence_number:
+                        type: integer
+                        minimum: 1
+                      start_position:
+                        type: integer
+                        minimum: 0
+                      end_position:
+                        type: integer
+                        minimum: 0
+                toc_entries:
+                  type: array
+                  description: Updated TOC entries (replaces all existing)
+                  items:
+                    type: object
+                    properties:
+                      level:
+                        type: integer
+                        minimum: 1
+                        maximum: 6
+                      title:
+                        type: string
+                        maxLength: 255
+                      anchor:
+                        type: string
+                        maxLength: 255
+                      position_in_content:
+                        type: integer
+                        minimum: 0
+              example:
+                post_id: "abc123def456"
+                title: "Updated Blog Post Title"
+                content: "# Updated Introduction\n\nThis is my updated blog post..."
+                status: "published"
+      responses:
+        '200':
+          description: Post updated and re-indexed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post_id:
+                    type: string
+                  updated:
+                    type: boolean
+                  indexed:
+                    type: boolean
+                  references_updated:
+                    type: integer
+                  toc_entries_updated:
+                    type: integer
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+  # =================================================================
+  # TAG MANAGEMENT (PostgREST)
+  # =================================================================
+  /rest/v1/fixed_tag:
+    get:
+      tags: [Tags]
+      summary: Get active fixed tags
+      description: Retrieve list of active fixed tags for post categorization
+      security: []
+      parameters:
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/IsActiveParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/IsDeletedParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/OrderParam'
+      responses:
+        '200':
+          description: List of fixed tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './nowhereland-api-components.yaml#/components/schemas/FixedTag'
+
+    post:
+      tags: [Tags]
+      summary: Create fixed tag (Admin only)
+      description: Create new fixed tag for content categorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  pattern: '^[a-z0-9-]+$'
+                  description: Tag name (lowercase, alphanumeric, hyphens only)
+                color:
+                  type: string
+                  pattern: '^#[0-9A-Fa-f]{6}$'
+                  default: '#D01C1F'
+                  description: Tag color in hex format
+                description:
+                  type: string
+                  maxLength: 255
+                  description: Tag description (optional)
+              example:
+                name: "web-development"
+                color: "#D01C1F"
+                description: "Posts about web development"
+      responses:
+        '201':
+          description: Fixed tag created successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/FixedTag'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '409':
+          description: Tag name already exists
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+    patch:
+      tags: [Tags]
+      summary: Update fixed tag or soft delete (Admin only)
+      description: Update existing fixed tag properties or mark as deleted
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Tag ID to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  pattern: '^[a-z0-9-]+$'
+                color:
+                  type: string
+                  pattern: '^#[0-9A-Fa-f]{6}$'
+                description:
+                  type: string
+                  maxLength: 255
+                is_active:
+                  type: boolean
+                  description: Set to false to deactivate tag
+                is_deleted:
+                  type: boolean
+                  description: Set to true for soft delete
+              example:
+                name: "frontend-development"
+                color: "#FF8200"
+                is_active: true
+      responses:
+        '200':
+          description: Fixed tag updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/FixedTag'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+  # =================================================================
+  # RELATED POSTS (PostgREST)
+  # =================================================================
+  /rest/v1/related_post:
+    get:
+      tags: [Related Posts]
+      summary: Get related posts for a specific post
+      description: Retrieve posts related to a specific post based on common tags
+      security: []
+      parameters:
+        - name: source_post_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: ID of the source post
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+          description: Maximum number of related posts
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "relevance_score.desc"
+          description: Sort order for results
+      responses:
+        '200':
+          description: Related posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './nowhereland-api-components.yaml#/components/schemas/RelatedPost'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      $ref: './nowhereland-api-components.yaml#/components/securitySchemes/JWTAuth'
+
+  schemas:
+    # Reference schemas from components file
+    Post:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/Post'
+    
+    PostWithDetails:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/PostWithDetails'
+    
+    Reference:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/Reference'
+    
+    TocEntry:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/TocEntry'
+    
+    FixedTag:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/FixedTag'
+    
+    RelatedPost:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/RelatedPost'
+    
+    ErrorResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+    
+    SuccessResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+
+tags:
+  - name: Posts
+    description: Blog post management and operations
+  - name: Tags
+    description: Fixed tag management for content categorization
+  - name: Related Posts
+    description: Content recommendation system

@@ -1,0 +1,548 @@
+openapi: 3.0.3
+info:
+  title: Nowhere Land Blog API - Search Domain
+  description: Content search and discovery functionality
+  version: 1.0.0
+  contact:
+    name: Kyojun Jin
+    email: jan@nowhereland.com
+
+servers:
+  - url: https://your-project.supabase.co
+    description: Supabase production server
+  - url: https://your-dev-project.supabase.co
+    description: Supabase development server
+
+security:
+  - JWTAuth: []
+
+paths:
+  # =================================================================
+  # SEARCH (Edge Function)
+  # =================================================================
+  /functions/v1/search-handler:
+    post:
+      tags: [Search]
+      summary: Search posts with text and tag filters
+      description: Search blog posts using OpenSearch with PostgreSQL fallback
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  maxLength: 255
+                  description: Search query text
+                tags:
+                  type: array
+                  items:
+                    type: string
+                    maxLength: 50
+                  maxItems: 10
+                  description: Tag filters (AND logic)
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                  default: 10
+                  description: Maximum number of results
+                offset:
+                  type: integer
+                  minimum: 0
+                  default: 0
+                  description: Number of results to skip
+                sort:
+                  type: string
+                  enum: [relevance, date_desc, date_asc]
+                  default: relevance
+                  description: Sort order for results
+                include_draft:
+                  type: boolean
+                  default: false
+                  description: Include draft posts (admin only)
+              example:
+                query: "web development"
+                tags: ["dev", "javascript"]
+                limit: 10
+                offset: 0
+                sort: "relevance"
+      responses:
+        '200':
+          description: Search results with metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: './nowhereland-api-components.yaml#/components/schemas/PostSearchResult'
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        description: Total number of matching results
+                      limit:
+                        type: integer
+                        description: Results per page
+                      offset:
+                        type: integer
+                        description: Current offset
+                      has_more:
+                        type: boolean
+                        description: Whether more results exist
+                  query_info:
+                    type: object
+                    properties:
+                      query:
+                        type: string
+                        description: Processed search query
+                      tags:
+                        type: array
+                        items:
+                          type: string
+                        description: Applied tag filters
+                      took:
+                        type: integer
+                        description: Query execution time in milliseconds
+                      engine:
+                        type: string
+                        enum: [opensearch, postgresql]
+                        description: Search engine used
+                      suggestions:
+                        type: array
+                        items:
+                          type: string
+                        description: Query suggestions for empty results
+                example:
+                  results:
+                    - id: "abc123def456"
+                      title: "Getting Started with Web Development"
+                      abstract: "A comprehensive guide to modern web development..."
+                      thumbnail_hash: "img789hash"
+                      published_at: "2024-01-15T10:30:00Z"
+                      tags: ["dev", "javascript", "tutorial"]
+                      score: 0.95
+                      highlights:
+                        title: ["<mark>Web Development</mark>"]
+                        content: ["Learn <mark>web development</mark> fundamentals..."]
+                  pagination:
+                    total: 25
+                    limit: 10
+                    offset: 0
+                    has_more: true
+                  query_info:
+                    query: "web development"
+                    tags: ["dev", "javascript"]
+                    took: 45
+                    engine: "opensearch"
+                    suggestions: []
+        '400':
+          description: Invalid search parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid_query"
+                  message:
+                    type: string
+                    example: "Search query too long or contains invalid characters"
+                  details:
+                    type: object
+                    properties:
+                      max_length:
+                        type: integer
+                        example: 255
+                      invalid_chars:
+                        type: array
+                        items:
+                          type: string
+        '429':
+          description: Search rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "rate_limit_exceeded"
+                  message:
+                    type: string
+                    example: "Too many search requests. Please wait before searching again."
+                  retry_after:
+                    type: integer
+                    description: Seconds to wait before next request
+
+  # Search suggestions endpoint
+  /functions/v1/search-suggestions:
+    get:
+      tags: [Search]
+      summary: Get search suggestions
+      description: Get autocomplete suggestions for search queries
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+          description: Partial search query
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+          description: Maximum number of suggestions
+      responses:
+        '200':
+          description: Search suggestions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        text:
+                          type: string
+                          description: Suggested search term
+                        type:
+                          type: string
+                          enum: [query, tag]
+                          description: Type of suggestion
+                        frequency:
+                          type: integer
+                          description: How often this term has been searched
+                  took:
+                    type: integer
+                    description: Response time in milliseconds
+                example:
+                  suggestions:
+                    - text: "web development"
+                      type: "query"
+                      frequency: 45
+                    - text: "javascript"
+                      type: "tag"
+                      frequency: 32
+                    - text: "web performance"
+                      type: "query"
+                      frequency: 18
+                  took: 12
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+
+  # Popular searches endpoint
+  /functions/v1/search-popular:
+    get:
+      tags: [Search]
+      summary: Get popular search terms
+      description: Retrieve most popular search queries and tags
+      security: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month, all]
+            default: week
+          description: Time period for popularity calculation
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [queries, tags, all]
+            default: all
+          description: Type of popular terms to return
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+          description: Maximum number of popular terms
+      responses:
+        '200':
+          description: Popular search terms
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  popular_queries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        query:
+                          type: string
+                        count:
+                          type: integer
+                        success_rate:
+                          type: number
+                          description: Percentage of searches with results
+                  popular_tags:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        tag:
+                          type: string
+                        count:
+                          type: integer
+                        post_count:
+                          type: integer
+                          description: Number of posts with this tag
+                  period:
+                    type: string
+                    description: Time period used for calculation
+                  generated_at:
+                    type: string
+                    format: date-time
+                example:
+                  popular_queries:
+                    - query: "web development"
+                      count: 45
+                      success_rate: 0.89
+                    - query: "javascript tutorial"
+                      count: 32
+                      success_rate: 0.94
+                  popular_tags:
+                    - tag: "dev"
+                      count: 78
+                      post_count: 15
+                    - tag: "javascript"
+                      count: 56
+                      post_count: 12
+                  period: "week"
+                  generated_at: "2024-01-15T10:30:00Z"
+
+  # =================================================================
+  # SEARCH ANALYTICS (Admin only)
+  # =================================================================
+  /rest/v1/search_analytics:
+    get:
+      tags: [Search Analytics]
+      summary: Get search analytics (Admin only)
+      description: Retrieve anonymized search analytics and metrics
+      parameters:
+        - name: period_start
+          in: query
+          schema:
+            type: string
+            format: date
+          example: "2024-01-01"
+          description: Start date for analytics period
+        - name: period_end
+          in: query
+          schema:
+            type: string
+            format: date
+          example: "2024-01-31"
+          description: End date for analytics period
+        - name: group_by
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: day
+          description: Grouping interval for results
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/LimitParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/OrderParam'
+      responses:
+        '200':
+          description: Search analytics data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    period:
+                      type: string
+                      format: date
+                      description: Date for this analytics period
+                    total_searches:
+                      type: integer
+                      description: Total number of searches
+                    unique_searches:
+                      type: integer
+                      description: Number of unique search terms
+                    avg_results_per_search:
+                      type: number
+                      description: Average number of results returned
+                    zero_result_searches:
+                      type: integer
+                      description: Searches that returned no results
+                    success_rate:
+                      type: number
+                      description: Percentage of searches with results
+                    avg_response_time:
+                      type: number
+                      description: Average response time in milliseconds
+                    opensearch_usage:
+                      type: number
+                      description: Percentage of searches using OpenSearch
+                    top_queries:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          query_hash:
+                            type: string
+                            description: Anonymized query identifier
+                          count:
+                            type: integer
+                          success_rate:
+                            type: number
+                      description: Most popular anonymized queries
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+  # Search configuration endpoint
+  /rest/v1/search_config:
+    get:
+      tags: [Search Analytics]
+      summary: Get search configuration (Admin only)
+      description: Retrieve current search engine configuration
+      responses:
+        '200':
+          description: Search configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  opensearch_enabled:
+                    type: boolean
+                    description: Whether OpenSearch is available
+                  opensearch_health:
+                    type: string
+                    enum: [green, yellow, red]
+                    description: OpenSearch cluster health
+                  fallback_enabled:
+                    type: boolean
+                    description: Whether PostgreSQL fallback is enabled
+                  index_stats:
+                    type: object
+                    properties:
+                      total_documents:
+                        type: integer
+                      last_indexed:
+                        type: string
+                        format: date-time
+                      index_size:
+                        type: string
+                        description: Index size in human readable format
+                  search_features:
+                    type: object
+                    properties:
+                      suggestions_enabled:
+                        type: boolean
+                      analytics_enabled:
+                        type: boolean
+                      rate_limiting:
+                        type: object
+                        properties:
+                          requests_per_minute:
+                            type: integer
+                          burst_limit:
+                            type: integer
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+    patch:
+      tags: [Search Analytics]
+      summary: Update search configuration (Admin only)
+      description: Modify search engine settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                opensearch_enabled:
+                  type: boolean
+                  description: Enable/disable OpenSearch
+                fallback_enabled:
+                  type: boolean
+                  description: Enable/disable PostgreSQL fallback
+                suggestions_enabled:
+                  type: boolean
+                  description: Enable/disable search suggestions
+                analytics_enabled:
+                  type: boolean
+                  description: Enable/disable search analytics
+                rate_limiting:
+                  type: object
+                  properties:
+                    requests_per_minute:
+                      type: integer
+                      minimum: 1
+                      maximum: 1000
+                    burst_limit:
+                      type: integer
+                      minimum: 1
+                      maximum: 100
+              example:
+                opensearch_enabled: true
+                suggestions_enabled: true
+                rate_limiting:
+                  requests_per_minute: 30
+                  burst_limit: 10
+      responses:
+        '200':
+          description: Configuration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      $ref: './nowhereland-api-components.yaml#/components/securitySchemes/JWTAuth'
+
+  schemas:
+    PostSearchResult:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/PostSearchResult'
+    
+    ErrorResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+    
+    SuccessResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+
+tags:
+  - name: Search
+    description: Content search and discovery functionality
+  - name: Search Analytics
+    description: Search metrics and configuration (Admin only)

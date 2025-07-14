@@ -1,0 +1,501 @@
+openapi: 3.0.3
+info:
+  title: Nowhere Land Blog API - Admin Settings Domain
+  description: Administrative configuration and site management
+  version: 1.0.0
+  contact:
+    name: Kyojun Jin
+    email: jan@nowhereland.com
+
+servers:
+  - url: https://your-project.supabase.co
+    description: Supabase production server
+  - url: https://your-dev-project.supabase.co
+    description: Supabase development server
+
+security:
+  - JWTAuth: []
+
+paths:
+  # =================================================================
+  # SITE SETTINGS (PostgREST)
+  # =================================================================
+  /rest/v1/site_setting:
+    get:
+      tags: [Site Settings]
+      summary: Get site settings (Admin only)
+      description: Retrieve all site configuration settings
+      responses:
+        '200':
+          description: List of site settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './nowhereland-api-components.yaml#/components/schemas/SiteSetting'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+    patch:
+      tags: [Site Settings]
+      summary: Update site setting (Admin only)
+      description: Update a specific site configuration setting
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Setting key to update
+          example: "site_title"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value:
+                  type: string
+                  description: New setting value
+              example:
+                value: "Nowhere Land - Personal Blog"
+      responses:
+        '200':
+          description: Site setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+  # =================================================================
+  # ABOUT ME MANAGEMENT (PostgREST for read, Edge Function for atomic updates)
+  # =================================================================
+  /rest/v1/about_me:
+    get:
+      tags: [About Me]
+      summary: Get about me content
+      description: Retrieve about me page content
+      security: []
+      responses:
+        '200':
+          description: About me content
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    user_id:
+                      type: string
+                    content:
+                      type: string
+                      description: About me content in markdown
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+
+  /rest/v1/contact:
+    get:
+      tags: [About Me]
+      summary: Get active contacts
+      description: Retrieve active contact information for display
+      security: []
+      parameters:
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/IsActiveParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/IsDeletedParam'
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "sort_order.asc"
+          description: Sort order for contacts
+      responses:
+        '200':
+          description: List of active contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './nowhereland-api-components.yaml#/components/schemas/Contact'
+
+  # Atomic update via Edge Function
+  /functions/v1/about-me:
+    post:
+      tags: [About Me]
+      summary: Update about me content and contacts atomically (Admin only)
+      description: Update about me page content and contact information in a single transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  description: About me content in markdown
+                contacts:
+                  type: array
+                  description: Contact information array
+                  items:
+                    type: object
+                    required: [type, url]
+                    properties:
+                      type:
+                        type: string
+                        enum: [email, x, instagram, facebook, phone]
+                        description: Contact type
+                      display_name:
+                        type: string
+                        maxLength: 100
+                        description: Display name for contact
+                      url:
+                        type: string
+                        description: Contact URL or value
+                      is_active:
+                        type: boolean
+                        default: true
+                        description: Whether contact is visible
+                      sort_order:
+                        type: integer
+                        default: 0
+                        description: Display order (ascending)
+              example:
+                content: "# About Me\n\nI'm a software developer passionate about web technologies..."
+                contacts:
+                  - type: "email"
+                    display_name: "Email"
+                    url: "jan@nowhereland.com"
+                    is_active: true
+                    sort_order: 1
+                  - type: "x"
+                    display_name: "Twitter"
+                    url: "https://x.com/username"
+                    is_active: true
+                    sort_order: 2
+      responses:
+        '200':
+          description: About me updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  content_updated:
+                    type: boolean
+                  contacts_updated:
+                    type: integer
+                    description: Number of contacts updated
+                  message:
+                    type: string
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+  # =================================================================
+  # ADMIN NOTIFICATIONS (PostgREST)
+  # =================================================================
+  /rest/v1/admin_notification:
+    get:
+      tags: [Admin Notifications]
+      summary: Get admin notifications (Admin only)
+      description: Retrieve admin notifications for flagged content and system events
+      parameters:
+        - name: is_read
+          in: query
+          schema:
+            type: string
+          example: "eq.false"
+          description: Filter by read status
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: Filter by notification type
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/OrderParam'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Maximum notifications to return
+      responses:
+        '200':
+          description: Admin notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './nowhereland-api-components.yaml#/components/schemas/AdminNotification'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+    patch:
+      tags: [Admin Notifications]
+      summary: Mark notification as read (Admin only)
+      description: Update notification read status
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Notification ID to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_read:
+                  type: boolean
+                  description: Mark as read (true) or unread (false)
+              example:
+                is_read: true
+      responses:
+        '200':
+          description: Notification updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+  # Bulk notification operations
+  /functions/v1/admin-notifications:
+    patch:
+      tags: [Admin Notifications]
+      summary: Bulk update notifications (Admin only)
+      description: Mark multiple notifications as read/unread
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  enum: [mark_all_read, mark_selected_read, delete_read]
+                  description: Bulk action to perform
+                notification_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Specific notification IDs (for selected actions)
+                filters:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: Filter by notification type
+                    older_than:
+                      type: string
+                      format: date
+                      description: Filter notifications older than date
+              example:
+                action: "mark_all_read"
+                filters:
+                  type: "comment_flagged"
+      responses:
+        '200':
+          description: Bulk operation completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected_count:
+                    type: integer
+                    description: Number of notifications affected
+                  action:
+                    type: string
+                    description: Action performed
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+  # =================================================================
+  # THEME MANAGEMENT
+  # =================================================================
+  /functions/v1/theme-config:
+    get:
+      tags: [Theme Management]
+      summary: Get current theme configuration (Admin only)
+      description: Retrieve current theme settings
+      responses:
+        '200':
+          description: Theme configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  light_mode_accent:
+                    type: string
+                    pattern: '^#[0-9A-Fa-f]{6}$'
+                    example: "#D01C1F"
+                  dark_mode_accent:
+                    type: string
+                    pattern: '^#[0-9A-Fa-f]{6}$'
+                    example: "#FF8200"
+                  border_radius:
+                    type: integer
+                    minimum: 0
+                    maximum: 50
+                    example: 8
+                    description: Border radius in pixels
+                  font_family:
+                    type: string
+                    example: "Inter, sans-serif"
+                  updated_at:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+    patch:
+      tags: [Theme Management]
+      summary: Update theme configuration (Admin only)
+      description: Update theme colors and styling
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                light_mode_accent:
+                  type: string
+                  pattern: '^#[0-9A-Fa-f]{6}$'
+                  description: Accent color for light mode
+                dark_mode_accent:
+                  type: string
+                  pattern: '^#[0-9A-Fa-f]{6}$'
+                  description: Accent color for dark mode
+                border_radius:
+                  type: integer
+                  minimum: 0
+                  maximum: 50
+                  description: Border radius in pixels
+                font_family:
+                  type: string
+                  maxLength: 100
+                  description: CSS font family
+              example:
+                light_mode_accent: "#D01C1F"
+                dark_mode_accent: "#FF8200"
+                border_radius: 8
+      responses:
+        '200':
+          description: Theme updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  css_regenerated:
+                    type: boolean
+                    description: Whether CSS was regenerated
+        '400':
+          description: Invalid theme configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  accessibility_warnings:
+                    type: array
+                    items:
+                      type: string
+                    description: WCAG contrast warnings
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      $ref: './nowhereland-api-components.yaml#/components/securitySchemes/JWTAuth'
+
+  schemas:
+    SiteSetting:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/SiteSetting'
+    
+    Contact:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/Contact'
+    
+    AdminNotification:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/AdminNotification'
+    
+    ErrorResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+    
+    SuccessResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+
+tags:
+  - name: Site Settings
+    description: Site configuration and settings management
+  - name: About Me
+    description: About me page and contact information management
+  - name: Admin Notifications
+    description: Admin notification system for moderation and alerts
+  - name: Theme Management
+    description: Visual theme and styling configuration

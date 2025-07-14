@@ -1,0 +1,396 @@
+openapi: 3.0.3
+info:
+  title: Nowhere Land Blog API - Shared Components
+  description: Shared components for Nowhere Land API domains
+  version: 1.0.0
+
+components:
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from Supabase Auth
+
+  schemas:
+    # Core Post Schemas
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        abstract:
+          type: string
+        thumbnail_hash:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+        view_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        published_at:
+          type: string
+          format: date-time
+
+    PostWithDetails:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        abstract:
+          type: string
+        thumbnail_hash:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+        view_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        published_at:
+          type: string
+          format: date-time
+        reference:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reference'
+        toc_entry:
+          type: array
+          items:
+            $ref: '#/components/schemas/TocEntry'
+
+    PostSearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        abstract:
+          type: string
+        thumbnail_hash:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+        score:
+          type: number
+        highlights:
+          type: object
+
+    # Comment Schemas
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+        post_id:
+          type: string
+        parent_comment_id:
+          type: string
+          nullable: true
+        username:
+          type: string
+        content:
+          type: string
+        status:
+          type: string
+          enum: [approved, flagged, deleted]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # Reference and TOC Schemas
+    Reference:
+      type: object
+      properties:
+        id:
+          type: string
+        post_id:
+          type: string
+        text:
+          type: string
+        url:
+          type: string
+          nullable: true
+        sequence_number:
+          type: integer
+        start_position:
+          type: integer
+        end_position:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    TocEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        post_id:
+          type: string
+        level:
+          type: integer
+          minimum: 1
+          maximum: 6
+        title:
+          type: string
+        anchor:
+          type: string
+        position_in_content:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    # Tag Schemas
+    FixedTag:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # Admin Settings Schemas
+    SiteSetting:
+      type: object
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        value:
+          type: string
+        description:
+          type: string
+        setting_type:
+          type: string
+          enum: [string, number, boolean, json, color]
+        updated_at:
+          type: string
+          format: date-time
+
+    # About Me Schemas
+    Contact:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [email, x, instagram, facebook, phone]
+        display_name:
+          type: string
+        url:
+          type: string
+        is_active:
+          type: boolean
+        sort_order:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # Related Posts Schema
+    RelatedPost:
+      type: object
+      properties:
+        id:
+          type: string
+        source_post_id:
+          type: string
+        related_post_id:
+          type: string
+        common_tag_count:
+          type: integer
+        relevance_score:
+          type: number
+        calculated_at:
+          type: string
+          format: date-time
+
+    # Admin Notification Schema
+    AdminNotification:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        related_entity_type:
+          type: string
+        related_entity_id:
+          type: string
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    # Common Response Schemas
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+
+  parameters:
+    # Common Query Parameters
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+      description: Maximum number of items to return
+
+    OffsetParam:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Number of items to skip
+
+    OrderParam:
+      name: order
+      in: query
+      schema:
+        type: string
+      description: Sort order (PostgREST format)
+
+    RangeHeader:
+      name: range
+      in: header
+      schema:
+        type: string
+      example: "0-9"
+      description: Range header for pagination
+
+    # Common Filter Parameters
+    StatusParam:
+      name: status
+      in: query
+      schema:
+        type: string
+      description: Filter by status
+
+    IsDeletedParam:
+      name: is_deleted
+      in: query
+      schema:
+        type: string
+      example: "eq.false"
+      description: Filter by deletion status
+
+    IsActiveParam:
+      name: is_active
+      in: query
+      schema:
+        type: string
+      example: "eq.true"
+      description: Filter by active status
+
+  responses:
+    # Common Response Templates
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ValidationError:
+      description: Input validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

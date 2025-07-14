@@ -6,7 +6,7 @@
 **Version**: 1.0  
 **Document Version**: 1.0  
 **Last Updated**: 2025-01-13  
-**Owner**: Jan Kim  
+**Owner**: Kyojun Jin
 
 ### Vision Statement
 Nowhere Land is a personal blog platform that serves as an incarnation of the author's personality on the internet. It combines personal thoughts, technical insights, and life experiences in a simple yet powerful blogging platform that reflects the author's philosophy of clean, meaningful digital experiences.
@@ -64,7 +64,7 @@ graph TB
 - **Key Entities**: User, Role, Session
 - **Business Rules**: Admin-only access, secure authentication
 
-#### 3. **Media Domain** (`media`)
+#### 3. **Media Domain** (`media`, mostly image but for extension) 
 - **Responsibility**: Image and file management, processing, and delivery
 - **Key Entities**: Image, Thumbnail, ProcessedAsset
 - **Business Rules**: File type validation, size limits, CDN optimization
@@ -211,15 +211,6 @@ graph TB
 
 prd/
 @00-overview.md              # This document
-@01-user-management.md       # UC-UM-xxx use cases
-@02-content-management.md    # UC-CM-xxx use cases
-@03-ai-services.md          # UC-AI-xxx use cases
-@04-search-discovery.md     # UC-SD-xxx use cases
-@05-comment-management.md       # UC-CS-xxx use cases
-@06-media-management.md     # UC-MM-xxx use cases
-@07-analytics.md            # UC-AN-xxx use cases
-@08-admin-settings.md       # UC-AS-xxx use cases
-@09-security-policies.md    # Security framework
 
 ## 🎯 Next Steps
 

@@ -1,0 +1,654 @@
+openapi: 3.0.3
+info:
+  title: Nowhere Land Blog API - Analytics Domain
+  description: Usage tracking, analytics, and reporting
+  version: 1.0.0
+  contact:
+    name: Kyojun Jin
+    email: jan@nowhereland.com
+
+servers:
+  - url: https://your-project.supabase.co
+    description: Supabase production server
+  - url: https://your-dev-project.supabase.co
+    description: Supabase development server
+
+security:
+  - JWTAuth: []
+
+paths:
+  # =================================================================
+  # ANALYTICS & TRACKING (Edge Functions)
+  # =================================================================
+  /functions/v1/view-tracker:
+    post:
+      tags: [Analytics Tracking]
+      summary: Track post view and dwell time
+      description: Record page view and engagement metrics (privacy-compliant)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [post_id]
+              properties:
+                post_id:
+                  type: string
+                  description: ID of the blog post being viewed
+                dwell_time:
+                  type: integer
+                  minimum: 0
+                  maximum: 1800
+                  description: Time spent on page in seconds (max 30 minutes)
+                referrer_type:
+                  type: string
+                  enum: [direct, search, social, referral, internal]
+                  description: How user arrived at the page
+                viewport_width:
+                  type: integer
+                  minimum: 320
+                  maximum: 4096
+                  description: Browser viewport width
+                gdpr_consent:
+                  type: boolean
+                  default: false
+                  description: User has given GDPR consent for tracking
+                ccpa_opt_out:
+                  type: boolean
+                  default: false
+                  description: User has opted out under CCPA
+              example:
+                post_id: "abc123def456"
+                dwell_time: 120
+                referrer_type: "search"
+                viewport_width: 1920
+                gdpr_consent: true
+      responses:
+        '200':
+          description: View tracked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracked:
+                    type: boolean
+                    description: Whether tracking was successful
+                  new_view:
+                    type: boolean
+                    description: Whether this is a new unique view
+                  session_id:
+                    type: string
+                    description: Anonymized session identifier
+                example:
+                  tracked: true
+                  new_view: true
+                  session_id: "anon_sess_xyz789"
+        '400':
+          description: Invalid tracking data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid_post_id"
+                  message:
+                    type: string
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "rate_limit_exceeded"
+                  message:
+                    type: string
+                  retry_after:
+                    type: integer
+                    description: Seconds to wait
+
+  /functions/v1/contact-click:
+    post:
+      tags: [Analytics Tracking]
+      summary: Track contact link clicks
+      description: Record clicks on About Me contact links
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contact_id]
+              properties:
+                contact_id:
+                  type: string
+                  description: ID of the contact link clicked
+                contact_type:
+                  type: string
+                  enum: [email, x, instagram, facebook, phone]
+                  description: Type of contact method
+                source_page:
+                  type: string
+                  enum: [about_me, post, home]
+                  default: about_me
+                  description: Page where click occurred
+                gdpr_consent:
+                  type: boolean
+                  default: false
+                ccpa_opt_out:
+                  type: boolean
+                  default: false
+              example:
+                contact_id: "contact_email_123"
+                contact_type: "email"
+                source_page: "about_me"
+                gdpr_consent: true
+      responses:
+        '200':
+          description: Click tracked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracked:
+                    type: boolean
+                  session_id:
+                    type: string
+                    description: Anonymized session identifier
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '404':
+          description: Contact not found
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+  # =================================================================
+  # DASHBOARD ANALYTICS (PostgREST Views - Admin only)
+  # =================================================================
+  /rest/v1/daily_analytics:
+    get:
+      tags: [Analytics Dashboard]
+      summary: Get daily analytics (Admin only)
+      description: Retrieve aggregated daily analytics data
+      parameters:
+        - name: view_date
+          in: query
+          schema:
+            type: string
+          example: "gte.2024-01-01"
+          description: Filter by date range (PostgREST format)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 365
+            default: 30
+          description: Number of days to return
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "view_date.desc"
+          description: Sort order
+      responses:
+        '200':
+          description: Daily analytics data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    view_date:
+                      type: string
+                      format: date
+                      description: Date for this analytics record
+                    unique_visitors:
+                      type: integer
+                      description: Number of unique visitors
+                    total_views:
+                      type: integer
+                      description: Total page views
+                    avg_dwell_time:
+                      type: number
+                      description: Average time spent in seconds
+                    bounce_rate:
+                      type: number
+                      description: Percentage of single-page sessions
+                    posts_viewed:
+                      type: integer
+                      description: Number of different posts viewed
+                    contact_clicks:
+                      type: integer
+                      description: Total contact link clicks
+                    top_referrer_types:
+                      type: object
+                      properties:
+                        direct:
+                          type: integer
+                        search:
+                          type: integer
+                        social:
+                          type: integer
+                        referral:
+                          type: integer
+                    device_breakdown:
+                      type: object
+                      properties:
+                        mobile:
+                          type: integer
+                        tablet:
+                          type: integer
+                        desktop:
+                          type: integer
+                example:
+                  - view_date: "2024-01-15"
+                    unique_visitors: 45
+                    total_views: 89
+                    avg_dwell_time: 125.5
+                    bounce_rate: 0.32
+                    posts_viewed: 12
+                    contact_clicks: 3
+                    top_referrer_types:
+                      direct: 25
+                      search: 15
+                      social: 5
+                    device_breakdown:
+                      mobile: 20
+                      tablet: 8
+                      desktop: 17
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+  /rest/v1/post_performance:
+    get:
+      tags: [Analytics Dashboard]
+      summary: Get post performance metrics (Admin only)
+      description: Retrieve performance data for individual posts
+      parameters:
+        - name: published_at
+          in: query
+          schema:
+            type: string
+          example: "gte.2024-01-01"
+          description: Filter by publication date
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "view_count.desc"
+          description: Sort order
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of posts to return
+      responses:
+        '200':
+          description: Post performance data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    slug:
+                      type: string
+                    view_count:
+                      type: integer
+                      description: Total views
+                    unique_visitors:
+                      type: integer
+                      description: Unique visitors
+                    avg_dwell_time:
+                      type: number
+                      description: Average time spent reading
+                    bounce_rate:
+                      type: number
+                      description: Percentage who left immediately
+                    published_at:
+                      type: string
+                      format: date-time
+                    comment_count:
+                      type: integer
+                      description: Number of approved comments
+                    engagement_score:
+                      type: number
+                      description: Calculated engagement metric
+                    performance_trend:
+                      type: string
+                      enum: [growing, stable, declining]
+                      description: 7-day trend
+                    top_referrers:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          count:
+                            type: integer
+                      description: Top traffic sources
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+  /rest/v1/contact_analytics:
+    get:
+      tags: [Analytics Dashboard]
+      summary: Get contact click analytics (Admin only)
+      description: Retrieve analytics for About Me contact interactions
+      parameters:
+        - name: click_date
+          in: query
+          schema:
+            type: string
+          example: "gte.2024-01-01"
+          description: Filter by click date
+        - name: contact_type
+          in: query
+          schema:
+            type: string
+          description: Filter by contact type
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "click_date.desc,click_count.desc"
+          description: Sort order
+      responses:
+        '200':
+          description: Contact analytics data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    contact_type:
+                      type: string
+                      enum: [email, x, instagram, facebook, phone]
+                    display_name:
+                      type: string
+                    click_count:
+                      type: integer
+                      description: Total clicks
+                    unique_clickers:
+                      type: integer
+                      description: Number of unique visitors who clicked
+                    click_date:
+                      type: string
+                      format: date
+                    conversion_rate:
+                      type: number
+                      description: Clicks per visitor ratio
+                    source_pages:
+                      type: object
+                      properties:
+                        about_me:
+                          type: integer
+                        post:
+                          type: integer
+                        home:
+                          type: integer
+                      description: Click source breakdown
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+  # =================================================================
+  # ANALYTICS CONFIGURATION & EXPORT
+  # =================================================================
+  /functions/v1/analytics-export:
+    post:
+      tags: [Analytics Management]
+      summary: Export analytics data (Admin only)
+      description: Generate analytics data export for external analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [date_range]
+              properties:
+                date_range:
+                  type: object
+                  required: [start, end]
+                  properties:
+                    start:
+                      type: string
+                      format: date
+                    end:
+                      type: string
+                      format: date
+                export_format:
+                  type: string
+                  enum: [csv, json]
+                  default: csv
+                include_segments:
+                  type: array
+                  items:
+                    type: string
+                    enum: [daily_stats, post_performance, contact_clicks, search_analytics]
+                  default: [daily_stats, post_performance]
+                anonymize_data:
+                  type: boolean
+                  default: true
+                  description: Whether to anonymize all personal data
+              example:
+                date_range:
+                  start: "2024-01-01"
+                  end: "2024-01-31"
+                export_format: "csv"
+                include_segments: ["daily_stats", "post_performance"]
+                anonymize_data: true
+      responses:
+        '200':
+          description: Export generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  export_id:
+                    type: string
+                    description: Unique export identifier
+                  download_url:
+                    type: string
+                    format: uri
+                    description: Temporary download URL (24h expiry)
+                  file_size:
+                    type: integer
+                    description: Export file size in bytes
+                  records_exported:
+                    type: integer
+                    description: Number of records included
+                  expires_at:
+                    type: string
+                    format: date-time
+                    description: When download URL expires
+        '400':
+          description: Invalid export parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  max_date_range:
+                    type: integer
+                    description: Maximum allowed date range in days
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+  /rest/v1/analytics_config:
+    get:
+      tags: [Analytics Management]
+      summary: Get analytics configuration (Admin only)
+      description: Retrieve current analytics settings and privacy configuration
+      responses:
+        '200':
+          description: Analytics configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracking_enabled:
+                    type: boolean
+                    description: Whether analytics tracking is active
+                  privacy_mode:
+                    type: string
+                    enum: [strict, balanced, minimal]
+                    description: Privacy compliance level
+                  data_retention_days:
+                    type: integer
+                    description: How long to keep raw analytics data
+                  anonymization_settings:
+                    type: object
+                    properties:
+                      hash_ip_addresses:
+                        type: boolean
+                      cookie_consent_required:
+                        type: boolean
+                      respect_dnt_header:
+                        type: boolean
+                        description: Respect Do Not Track header
+                  gdpr_compliance:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      consent_banner:
+                        type: boolean
+                      data_portability:
+                        type: boolean
+                  rate_limits:
+                    type: object
+                    properties:
+                      views_per_ip_per_hour:
+                        type: integer
+                      clicks_per_ip_per_hour:
+                        type: integer
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+    patch:
+      tags: [Analytics Management]
+      summary: Update analytics configuration (Admin only)
+      description: Modify analytics settings and privacy controls
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tracking_enabled:
+                  type: boolean
+                privacy_mode:
+                  type: string
+                  enum: [strict, balanced, minimal]
+                data_retention_days:
+                  type: integer
+                  minimum: 1
+                  maximum: 365
+                anonymization_settings:
+                  type: object
+                  properties:
+                    hash_ip_addresses:
+                      type: boolean
+                    cookie_consent_required:
+                      type: boolean
+                    respect_dnt_header:
+                      type: boolean
+                gdpr_compliance:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    consent_banner:
+                      type: boolean
+                rate_limits:
+                  type: object
+                  properties:
+                    views_per_ip_per_hour:
+                      type: integer
+                      minimum: 1
+                      maximum: 1000
+                    clicks_per_ip_per_hour:
+                      type: integer
+                      minimum: 1
+                      maximum: 100
+      responses:
+        '200':
+          description: Configuration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      $ref: './nowhereland-api-components.yaml#/components/securitySchemes/JWTAuth'
+
+  schemas:
+    ErrorResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+    
+    SuccessResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+
+tags:
+  - name: Analytics Tracking
+    description: Privacy-compliant usage tracking and data collection
+  - name: Analytics Dashboard
+    description: Analytics reporting and insights (Admin only)
+  - name: Analytics Management
+    description: Analytics configuration and data export (Admin only)

@@ -1,0 +1,575 @@
+openapi: 3.0.3
+info:
+  title: Nowhere Land Blog API - Media Management Domain
+  description: Image upload, processing, and CDN delivery
+  version: 1.0.0
+  contact:
+    name: Kyojun Jin
+    email: jan@nowhereland.com
+
+servers:
+  - url: https://your-project.supabase.co
+    description: Supabase production server
+  - url: https://your-dev-project.supabase.co
+    description: Supabase development server
+
+security:
+  - JWTAuth: []
+
+paths:
+  # =================================================================
+  # MEDIA MANAGEMENT (Edge Functions)
+  # =================================================================
+  /functions/v1/image-processor:
+    post:
+      tags: [Media Upload]
+      summary: Upload and process image (Admin only)
+      description: Upload image file with automatic processing and optimization
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Image file (JPG, PNG, GIF, WebP, max 5MB)
+                description:
+                  type: string
+                  maxLength: 255
+                  description: Optional image description
+                alt_text:
+                  type: string
+                  maxLength: 255
+                  description: Alt text for accessibility
+            encoding:
+              image:
+                contentType: image/jpeg, image/png, image/gif, image/webp
+      responses:
+        '200':
+          description: Image processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hash:
+                    type: string
+                    description: Unique hash identifier for the image
+                    example: "abc123def456"
+                  original_url:
+                    type: string
+                    format: uri
+                    description: URL to original image
+                    example: "/functions/v1/media-cdn/abc123def456?width=original"
+                  webp_url:
+                    type: string
+                    format: uri
+                    description: URL to WebP optimized version
+                    example: "/functions/v1/media-cdn/abc123def456?width=1200"
+                  thumbnail_url:
+                    type: string
+                    format: uri
+                    description: URL to thumbnail version
+                    example: "/functions/v1/media-cdn/abc123def456?width=320"
+                  metadata:
+                    type: object
+                    properties:
+                      original_width:
+                        type: integer
+                        example: 1920
+                      original_height:
+                        type: integer
+                        example: 1080
+                      file_size:
+                        type: integer
+                        description: File size in bytes
+                        example: 245760
+                      mime_type:
+                        type: string
+                        example: "image/jpeg"
+                      created_at:
+                        type: string
+                        format: date-time
+                  responsive_urls:
+                    type: object
+                    properties:
+                      small:
+                        type: string
+                        description: "320px width"
+                      medium:
+                        type: string
+                        description: "720px width"
+                      large:
+                        type: string
+                        description: "1200px width"
+                    example:
+                      small: "/functions/v1/media-cdn/abc123def456?width=320"
+                      medium: "/functions/v1/media-cdn/abc123def456?width=720"
+                      large: "/functions/v1/media-cdn/abc123def456?width=1200"
+        '400':
+          description: Invalid file type, size, or format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    enum: [invalid_file_type, file_too_large, corrupted_file, processing_failed]
+                  message:
+                    type: string
+                  details:
+                    type: object
+                    properties:
+                      max_size:
+                        type: string
+                        example: "5MB"
+                      allowed_types:
+                        type: array
+                        items:
+                          type: string
+                        example: ["JPEG", "PNG", "GIF", "WebP"]
+                      file_size:
+                        type: integer
+                        description: Actual file size in bytes
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "file_too_large"
+                  message:
+                    type: string
+                    example: "File size exceeds 5MB limit"
+                  max_size:
+                    type: integer
+                    description: Maximum allowed size in bytes
+
+  /functions/v1/media-cdn/{hash}:
+    get:
+      tags: [Media Delivery]
+      summary: Serve image with dynamic resizing
+      description: Serve optimized image with on-demand resizing and format conversion
+      security: []
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Image hash identifier
+          example: "abc123def456"
+        - name: width
+          in: query
+          schema:
+            type: integer
+            minimum: 32
+            maximum: 2048
+          description: Desired image width in pixels
+          example: 720
+        - name: height
+          in: query
+          schema:
+            type: integer
+            minimum: 32
+            maximum: 2048
+          description: Desired image height in pixels (optional)
+        - name: quality
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 80
+          description: Image quality for lossy formats
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [webp, jpeg, png, auto]
+            default: auto
+          description: Output format (auto detects browser support)
+        - name: fit
+          in: query
+          schema:
+            type: string
+            enum: [cover, contain, fill]
+            default: cover
+          description: Resize behavior
+      responses:
+        '200':
+          description: Image file served
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+              example: "public, max-age=31536000, immutable"
+            Content-Type:
+              schema:
+                type: string
+              example: "image/webp"
+            Content-Length:
+              schema:
+                type: integer
+            ETag:
+              schema:
+                type: string
+              description: Image version identifier
+          content:
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '304':
+          description: Not Modified (cached version is current)
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid_dimensions"
+                  message:
+                    type: string
+                  max_width:
+                    type: integer
+                  max_height:
+                    type: integer
+        '404':
+          description: Image not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "image_not_found"
+                  message:
+                    type: string
+                    example: "Image with specified hash does not exist"
+
+  # =================================================================
+  # MEDIA LIBRARY MANAGEMENT (Admin only)
+  # =================================================================
+  /rest/v1/media_asset:
+    get:
+      tags: [Media Library]
+      summary: Get media library assets (Admin only)
+      description: Browse uploaded media assets with metadata
+      parameters:
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "created_at.desc"
+          description: Sort order for assets
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/LimitParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/OffsetParam'
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search in filename or description
+        - name: mime_type
+          in: query
+          schema:
+            type: string
+          example: "like.image/*"
+          description: Filter by MIME type
+        - name: used_in_posts
+          in: query
+          schema:
+            type: string
+            enum: ["true", "false", "any"]
+            default: "any"
+          description: Filter by usage in posts
+      responses:
+        '200':
+          description: Media assets with metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    hash:
+                      type: string
+                    filename:
+                      type: string
+                    description:
+                      type: string
+                    alt_text:
+                      type: string
+                    mime_type:
+                      type: string
+                    file_size:
+                      type: integer
+                    original_width:
+                      type: integer
+                    original_height:
+                      type: integer
+                    created_at:
+                      type: string
+                      format: date-time
+                    usage_count:
+                      type: integer
+                      description: Number of posts using this image
+                    last_used:
+                      type: string
+                      format: date-time
+                      nullable: true
+                    urls:
+                      type: object
+                      properties:
+                        thumbnail:
+                          type: string
+                        medium:
+                          type: string
+                        large:
+                          type: string
+                        original:
+                          type: string
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+    patch:
+      tags: [Media Library]
+      summary: Update media asset metadata (Admin only)
+      description: Update image description, alt text, or other metadata
+      parameters:
+        - name: hash
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Image hash to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  maxLength: 255
+                alt_text:
+                  type: string
+                  maxLength: 255
+                filename:
+                  type: string
+                  maxLength: 255
+                  pattern: '^[^<>:"/\\|?*]+$'
+              example:
+                description: "Screenshot of the new feature"
+                alt_text: "Dashboard showing analytics charts"
+      responses:
+        '200':
+          description: Media metadata updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+  /functions/v1/media-delete:
+    delete:
+      tags: [Media Library]
+      summary: Delete media asset (Admin only)
+      description: Safely delete media asset if not used in posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [hash]
+              properties:
+                hash:
+                  type: string
+                  description: Image hash to delete
+                force:
+                  type: boolean
+                  default: false
+                  description: Force delete even if used in posts
+              example:
+                hash: "abc123def456"
+                force: false
+      responses:
+        '200':
+          description: Media asset deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  files_deleted:
+                    type: array
+                    items:
+                      type: string
+                    description: List of deleted file variants
+        '400':
+          description: Cannot delete - asset is in use
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "asset_in_use"
+                  message:
+                    type: string
+                  used_in_posts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        post_id:
+                          type: string
+                        post_title:
+                          type: string
+                    description: Posts using this asset
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+  # =================================================================
+  # MEDIA OPTIMIZATION & MAINTENANCE
+  # =================================================================
+  /functions/v1/media-optimize:
+    post:
+      tags: [Media Maintenance]
+      summary: Optimize media assets (Admin only)
+      description: Trigger optimization for existing media assets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hash:
+                  type: string
+                  description: Specific image hash to optimize (optional)
+                force_regenerate:
+                  type: boolean
+                  default: false
+                  description: Force regeneration of all variants
+                quality_settings:
+                  type: object
+                  properties:
+                    webp_quality:
+                      type: integer
+                      minimum: 1
+                      maximum: 100
+                      default: 80
+                    jpeg_quality:
+                      type: integer
+                      minimum: 1
+                      maximum: 100
+                      default: 85
+              example:
+                force_regenerate: true
+                quality_settings:
+                  webp_quality: 85
+                  jpeg_quality: 90
+      responses:
+        '200':
+          description: Optimization completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  processed_count:
+                    type: integer
+                    description: Number of assets processed
+                  space_saved:
+                    type: integer
+                    description: Bytes saved through optimization
+                  processing_time:
+                    type: integer
+                    description: Processing time in milliseconds
+        '202':
+          description: Optimization started (background processing)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Optimization started in background"
+                  job_id:
+                    type: string
+                    description: Background job identifier
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      $ref: './nowhereland-api-components.yaml#/components/securitySchemes/JWTAuth'
+
+  schemas:
+    ErrorResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+    
+    SuccessResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+
+tags:
+  - name: Media Upload
+    description: Image upload and processing
+  - name: Media Delivery
+    description: Image serving and CDN functionality
+  - name: Media Library
+    description: Media asset management and browsing
+  - name: Media Maintenance
+    description: Optimization and maintenance tasks

@@ -1,0 +1,614 @@
+openapi: 3.0.3
+info:
+  title: Nowhere Land Blog API - Comment Management Domain
+  description: Anonymous commenting system with moderation and filtering
+  version: 1.0.0
+  contact:
+    name: Kyojun Jin
+    email: jan@nowhereland.com
+
+servers:
+  - url: https://your-project.supabase.co
+    description: Supabase production server
+  - url: https://your-dev-project.supabase.co
+    description: Supabase development server
+
+security:
+  - JWTAuth: []
+
+paths:
+  # =================================================================
+  # COMMENT MANAGEMENT (PostgREST + Edge Functions)
+  # =================================================================
+  /rest/v1/comment:
+    get:
+      tags: [Comments]
+      summary: Get approved comments for a post with pagination
+      description: Retrieve list of approved comments for a specific blog post
+      security: []
+      parameters:
+        - name: post_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: ID of the blog post
+        - name: status
+          in: query
+          schema:
+            type: string
+          example: "eq.approved"
+          description: Filter by comment status
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/IsDeletedParam'
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "created_at.asc"
+          description: Sort order (oldest first for threaded display)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum comments per page
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/OffsetParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/RangeHeader'
+      responses:
+        '200':
+          description: List of comments with threading information
+          headers:
+            Content-Range:
+              schema:
+                type: string
+              example: "0-19/45"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: './nowhereland-api-components.yaml#/components/schemas/Comment'
+                    - type: object
+                      properties:
+                        depth:
+                          type: integer
+                          description: Comment nesting level (0 for top-level, 1 for replies)
+                        reply_count:
+                          type: integer
+                          description: Number of direct replies
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+    post:
+      tags: [Comments]
+      summary: Create admin comment (Admin only - no password needed)
+      description: Create comment as authenticated admin user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [post_id, content]
+              properties:
+                post_id:
+                  type: string
+                  description: ID of the blog post
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+                  description: Comment content
+                parent_comment_id:
+                  type: string
+                  nullable: true
+                  description: ID of parent comment (for replies)
+              example:
+                post_id: "abc123def456"
+                content: "Thanks for reading! Let me know if you have any questions."
+                parent_comment_id: null
+      responses:
+        '201':
+          description: Admin comment created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: './nowhereland-api-components.yaml#/components/schemas/Comment'
+                  - type: object
+                    properties:
+                      is_admin:
+                        type: boolean
+                        example: true
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+    patch:
+      tags: [Comments]
+      summary: Update comment status or soft delete (Admin only)
+      description: Moderate comments by changing status or soft deleting
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Comment ID to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [approved, flagged, deleted]
+                  description: New comment status
+                is_deleted:
+                  type: boolean
+                  description: Set to true for soft delete
+              example:
+                status: "approved"
+      responses:
+        '200':
+          description: Comment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+  # Comment creation with filtering (Edge Function)
+  /functions/v1/comment-filter:
+    post:
+      tags: [Comments]
+      summary: Create comment with content filtering
+      description: Submit anonymous comment with automatic content filtering and moderation
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [post_id, username, password, content]
+              properties:
+                post_id:
+                  type: string
+                  description: ID of the blog post
+                username:
+                  type: string
+                  minLength: 2
+                  maxLength: 50
+                  pattern: '^[^<>{}]*$'
+                  description: Display name for anonymous commenter
+                password:
+                  type: string
+                  minLength: 4
+                  maxLength: 100
+                  description: Password for future edit/delete (will be hashed)
+                content:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+                  description: Comment content
+                parent_comment_id:
+                  type: string
+                  nullable: true
+                  description: ID of parent comment (for replies)
+              example:
+                post_id: "abc123def456"
+                username: "Anonymous Reader"
+                password: "mypassword123"
+                content: "Great article! I learned a lot from this post."
+                parent_comment_id: null
+      responses:
+        '201':
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment_id:
+                    type: string
+                    description: Created comment ID
+                  status:
+                    type: string
+                    enum: [approved, flagged]
+                    description: Initial comment status after filtering
+                  message:
+                    type: string
+                    description: Status message
+                example:
+                  comment_id: "xyz789ghi012"
+                  status: "approved"
+                  message: "Comment posted successfully"
+        '400':
+          description: Invalid input or content flagged and rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  flagged_keywords:
+                    type: array
+                    items:
+                      type: string
+                    description: Keywords that triggered filtering (admin view only)
+        '404':
+          description: Post not found or comments disabled
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "rate_limit_exceeded"
+                  message:
+                    type: string
+                    example: "Too many comments. Please wait before posting again."
+
+  # Comment deletion with password verification (Edge Function)
+  /functions/v1/comment-delete:
+    post:
+      tags: [Comments]
+      summary: Soft delete anonymous comment with password verification
+      description: Delete own comment using password verification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [comment_id, password]
+              properties:
+                comment_id:
+                  type: string
+                  description: ID of comment to delete
+                password:
+                  type: string
+                  description: Original password used when creating comment
+              example:
+                comment_id: "xyz789ghi012"
+                password: "mypassword123"
+      responses:
+        '200':
+          description: Comment soft deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Comment deleted successfully"
+        '401':
+          description: Invalid password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid_password"
+                  message:
+                    type: string
+                    example: "Incorrect password"
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+        '429':
+          description: Too many password attempts
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+  # Comment modification with password verification (Edge Function)
+  /functions/v1/comment-modify:
+    post:
+      tags: [Comments]
+      summary: Modify anonymous comment with password verification
+      description: Edit own comment content using password verification
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [comment_id, password, content]
+              properties:
+                comment_id:
+                  type: string
+                  description: ID of comment to modify
+                password:
+                  type: string
+                  description: Original password used when creating comment
+                content:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+                  description: New comment content
+              example:
+                comment_id: "xyz789ghi012"
+                password: "mypassword123"
+                content: "Great article! I learned a lot from this post. [Edited for clarity]"
+      responses:
+        '200':
+          description: Comment modified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status:
+                    type: string
+                    enum: [approved, flagged]
+                    description: Status after content filtering
+                  message:
+                    type: string
+                    example: "Comment updated successfully"
+        '400':
+          description: Content flagged and rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "content_flagged"
+                  message:
+                    type: string
+                  flagged_keywords:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          description: Invalid password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid_password"
+                  message:
+                    type: string
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+  # =================================================================
+  # COMMENT MODERATION (Admin only)
+  # =================================================================
+  /rest/v1/comment_flagged:
+    get:
+      tags: [Comment Moderation]
+      summary: Get flagged comments for review (Admin only)
+      description: Retrieve comments flagged by content filter for manual review
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+          example: "eq.flagged"
+          description: Filter by flagged status
+        - name: order
+          in: query
+          schema:
+            type: string
+          example: "created_at.desc"
+          description: Sort by creation date (newest first)
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/LimitParam'
+        - $ref: './nowhereland-api-components.yaml#/components/parameters/OffsetParam'
+      responses:
+        '200':
+          description: List of flagged comments with context
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: './nowhereland-api-components.yaml#/components/schemas/Comment'
+                    - type: object
+                      properties:
+                        post_title:
+                          type: string
+                          description: Title of the associated blog post
+                        flagged_keywords:
+                          type: array
+                          items:
+                            type: string
+                          description: Keywords that triggered flagging
+                        flagged_at:
+                          type: string
+                          format: date-time
+                          description: When comment was flagged
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+  # Keyword filter management
+  /rest/v1/filter_keyword:
+    get:
+      tags: [Comment Moderation]
+      summary: Get comment filter keywords (Admin only)
+      description: Retrieve list of keywords used for comment filtering
+      responses:
+        '200':
+          description: List of filter keywords
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    keyword:
+                      type: string
+                    case_sensitive:
+                      type: boolean
+                    is_active:
+                      type: boolean
+                    created_at:
+                      type: string
+                      format: date-time
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+
+    post:
+      tags: [Comment Moderation]
+      summary: Add filter keyword (Admin only)
+      description: Add new keyword to comment content filter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [keyword]
+              properties:
+                keyword:
+                  type: string
+                  minLength: 2
+                  maxLength: 50
+                  description: Keyword to filter
+                case_sensitive:
+                  type: boolean
+                  default: false
+                  description: Whether matching should be case sensitive
+              example:
+                keyword: "spam"
+                case_sensitive: false
+      responses:
+        '201':
+          description: Filter keyword added successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '409':
+          description: Keyword already exists
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+    patch:
+      tags: [Comment Moderation]
+      summary: Update or delete filter keyword (Admin only)
+      description: Modify existing filter keyword or mark as deleted
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Keyword ID to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                keyword:
+                  type: string
+                  minLength: 2
+                  maxLength: 50
+                case_sensitive:
+                  type: boolean
+                is_active:
+                  type: boolean
+                  description: Set to false to deactivate keyword
+                is_deleted:
+                  type: boolean
+                  description: Set to true to delete keyword
+      responses:
+        '200':
+          description: Filter keyword updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ForbiddenError'
+        '404':
+          $ref: './nowhereland-api-components.yaml#/components/responses/NotFoundError'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      $ref: './nowhereland-api-components.yaml#/components/securitySchemes/JWTAuth'
+
+  schemas:
+    Comment:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/Comment'
+    
+    ErrorResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+    
+    SuccessResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+
+tags:
+  - name: Comments
+    description: Anonymous comment submission and management
+  - name: Comment Moderation
+    description: Comment moderation and content filtering (Admin only)

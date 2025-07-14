@@ -4,7 +4,7 @@ info:
   description: Complete API specification for Nowhere Land personal blog platform using Supabase PostgREST + Edge Functions
   version: 1.0.0
   contact:
-    name: Jan Kim
+    name: Kyojun Jin
     email: jan@nowhereland.com
 
 servers:

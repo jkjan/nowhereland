@@ -50,7 +50,7 @@ Content-Type: application/json
   "user": {
     "id": "1weyuz23fx",
     "email": "admin@nowhereland.com",
-    "display_name": "Jan Kim",
+    "display_name": "Kyojun Jin",
     "role": "admin",
     "approved": true
   }
@@ -101,7 +101,7 @@ Content-Type: application/json
     "providers": ["email"]
   },
   "user_metadata": {
-    "display_name": "Jan Kim"
+    "display_name": "Kyojun Jin"
   }
 }
 ```

@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: Nowhere Land Blog API - Authentication Domain
+  description: Authentication and session management for Nowhere Land blog platform
+  version: 1.0.0
+  contact:
+    name: Kyojun Jin
+    email: jan@nowhereland.com
+
+servers:
+  - url: https://your-project.supabase.co
+    description: Supabase production server
+  - url: https://your-dev-project.supabase.co
+    description: Supabase development server
+
+security:
+  - JWTAuth: []
+
+paths:
+  # =================================================================
+  # AUTHENTICATION ENDPOINTS
+  # =================================================================
+  /auth/v1/signup:
+    post:
+      tags: [Authentication]
+      summary: User signup
+      description: Register a new user account (Admin approval required)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Valid email address
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 64
+                  description: Password following NIST guidelines
+              example:
+                email: "admin@nowhereland.com"
+                password: "securepassword123"
+      responses:
+        '200':
+          description: Signup successful - confirmation email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
+                      email_confirmed_at:
+                        type: string
+                        nullable: true
+                      created_at:
+                        type: string
+                        format: date-time
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+  /auth/v1/token:
+    post:
+      tags: [Authentication]
+      summary: User login
+      description: Authenticate user and return JWT tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              example:
+                email: "admin@nowhereland.com"
+                password: "securepassword123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: JWT access token (1 hour expiry)
+                  refresh_token:
+                    type: string
+                    description: JWT refresh token (30 days expiry)
+                  expires_in:
+                    type: integer
+                    description: Access token expiry in seconds
+                  token_type:
+                    type: string
+                    example: "bearer"
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+                        enum: [admin, user]
+                      approved:
+                        type: boolean
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+        '403':
+          description: Account not approved
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+  /auth/v1/logout:
+    post:
+      tags: [Authentication]
+      summary: User logout
+      description: Invalidate user session and tokens
+      responses:
+        '204':
+          description: Logout successful
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+
+  /auth/v1/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      description: Get new access token using refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+                  description: Valid refresh token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  expires_in:
+                    type: integer
+                  token_type:
+                    type: string
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+  /auth/v1/user:
+    get:
+      tags: [Authentication]
+      summary: Get current user profile
+      description: Retrieve authenticated user information
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  email:
+                    type: string
+                  role:
+                    type: string
+                    enum: [admin, user]
+                  approved:
+                    type: boolean
+                  email_confirmed_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+
+    patch:
+      tags: [Authentication]
+      summary: Update user profile
+      description: Update authenticated user profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: New email address
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 64
+                  description: New password
+                current_password:
+                  type: string
+                  description: Current password (required for password change)
+              example:
+                email: "newemail@nowhereland.com"
+                password: "newsecurepassword123"
+                current_password: "currentsecurepassword123"
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '401':
+          $ref: './nowhereland-api-components.yaml#/components/responses/UnauthorizedError'
+        '403':
+          description: Current password incorrect
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+  /auth/v1/recover:
+    post:
+      tags: [Authentication]
+      summary: Request password reset
+      description: Send password reset email
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Email address for password reset
+              example:
+                email: "admin@nowhereland.com"
+      responses:
+        '200':
+          description: Password reset email sent (if email exists)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password reset email sent if account exists"
+        '400':
+          $ref: './nowhereland-api-components.yaml#/components/responses/ValidationError'
+        '429':
+          description: Too many reset requests
+          content:
+            application/json:
+              schema:
+                $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    JWTAuth:
+      $ref: './nowhereland-api-components.yaml#/components/securitySchemes/JWTAuth'
+
+  schemas:
+    ErrorResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/ErrorResponse'
+    
+    SuccessResponse:
+      $ref: './nowhereland-api-components.yaml#/components/schemas/SuccessResponse'
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
