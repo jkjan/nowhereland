@@ -143,16 +143,6 @@ production:
     provider: "AWS OpenSearch t3.small"
     cost: "$30/month"
     scaling: "Manual to t3.medium if needed"
-    
-  ai_services:
-    provider: "OpenAI + Anthropic"
-    budget: "$15/month"
-    fallback: "Local NLP"
-    
-  monitoring:
-    level: "enterprise"
-    alerts: "email + slack + sms"
-    uptime: "99.9% target"
 ```
 
 ## Complete Infrastructure Components
@@ -202,31 +192,7 @@ backend:
     cdn: "Global distribution"
 ```
 
-### 3. AI Services Infrastructure
-```yaml
-ai_services:
-  primary_provider: "OpenAI"
-  models:
-    - gpt-3.5-turbo: "Tag & abstract generation"
-    - text-embedding-ada-002: "Content embeddings"
-    
-  backup_provider: "Anthropic"
-  models:
-    - claude-3-haiku: "Quality validation"
-    
-  local_fallback: "Hugging Face Transformers"
-  models:
-    - sentence-transformers/all-MiniLM-L6-v2: "Embeddings"
-    - facebook/bart-large-cnn: "Summarization"
-    
-  features:
-    - intelligent_caching: true
-    - quality_validation: true
-    - cost_optimization: true
-    - performance_monitoring: true
-```
-
-### 4. Media Infrastructure
+### 3. Media Infrastructure
 ```yaml
 media_infrastructure:
   storage:
@@ -251,7 +217,7 @@ media_infrastructure:
     - lazy_loading_support: true
 ```
 
-### 5. Search Infrastructure
+### 4. Search Infrastructure
 ```yaml
 search:
   primary:
@@ -274,7 +240,7 @@ search:
     - search_analytics: true
 ```
 
-### 6. Monitoring Infrastructure
+### 5. Monitoring Infrastructure
 ```yaml
 monitoring:
   application:
@@ -291,31 +257,6 @@ monitoring:
     dashboard: "Custom admin dashboard"
     metrics: "User engagement, content performance"
     reporting: "Weekly automated reports"
-```
-
-### 7. Security Infrastructure
-```yaml
-security:
-  ssl_tls:
-    provider: "Cloudflare"
-    version: "TLS 1.3"
-    
-  authentication:
-    multi_factor: "TOTP (admin accounts)"
-    session_management: "Secure JWT"
-    
-  authorization:
-    strategy: "Role-based + Row-level security"
-    policies: "Principle of least privilege"
-    
-  data_protection:
-    encryption_at_rest: "AES-256"
-    encryption_in_transit: "TLS 1.3"
-    backups: "Encrypted"
-    
-  compliance:
-    gdpr: "Cookie consent + data portability"
-    ccpa: "Privacy controls"
 ```
 
 ## Deployment Pipeline
