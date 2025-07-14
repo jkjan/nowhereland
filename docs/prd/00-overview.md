@@ -207,11 +207,6 @@ graph TB
 - Enhanced security
 - Performance at scale
 
-## 📝 Documentation Structure
-
-prd/
-@00-overview.md              # This document
-
 ## 🎯 Next Steps
 
 1. **Review Domain Model**: Validate domain boundaries and responsibilities
