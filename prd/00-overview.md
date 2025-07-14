@@ -220,7 +220,6 @@ prd/
 @07-analytics.md            # UC-AN-xxx use cases
 @08-admin-settings.md       # UC-AS-xxx use cases
 @09-security-policies.md    # Security framework
-@10-api-specifications.md   # Technical API details
 
 ## 🎯 Next Steps
 
