@@ -1,4 +1,4 @@
-import { PostManagerRequest } from "../types/post-types.ts";
+import { PostManagerRequest } from "../../test-manager/types/post-types.ts";
 
 export const validPostData: PostManagerRequest = {
   title: "Test Blog Post",

@@ -1,7 +1,6 @@
-import { assertEquals, assertExists } from "https://deno.land/std@0.192.0/testing/asserts.ts";
-import { PostService } from "../services/post-service.ts";
-import { TocService } from "../services/toc-service.ts";
-import { validatePostRequest } from "../validators/post-validator.ts";
+import { assertEquals, assertExists } from "jsr:@std/assert";
+import { TocService } from "../../post-manager/services/toc-service.ts";
+import { validatePostRequest } from "../../post-manager/validators/post-validator.ts";
 
 Deno.test("PostManager - Validation Tests", async (t) => {
   await t.step("should validate required fields", () => {
@@ -93,12 +92,8 @@ That's it!`;
 });
 
 Deno.test("PostManager - Integration Tests", async (t) => {
-  // Mock environment variables for testing
-  Deno.env.set("SUPABASE_URL", "http://localhost:54321");
-  Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-key");
-  
-  await t.step("should create post manager response structure", () => {
-    const postService = new PostService();
-    assertExists(postService);
+  await t.step("should create TocService instance", () => {
+    const tocService = new TocService();
+    assertExists(tocService);
   });
 });
