@@ -3,7 +3,6 @@
 ## How to develop edge functions
 
 <a href="https://supabase.com/docs/guides/functions/development-tips" target="_blank">Development tips</a>
-https://supabase.com/docs/guides/functions/unit-test
 
 ## Function List
 
