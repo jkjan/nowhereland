@@ -1,8 +1,9 @@
-import { CommentFilterRequest, CommentFilterResponse, FilterKeyword } from "../types/comment-types.ts";
+import { CommentFilterResponse, FilterKeyword } from "../types/comment-types.ts";
+import { CommentFilterRequest } from "../validators/comment-validator.ts";
 import { DatabaseService } from "./database-service.ts";
 import { FilterService } from "./filter-service.ts";
 import { PasswordService } from "./password-service.ts";
-import { nanoid } from "https://deno.land/x/nanoid@v3.0.0/mod.ts";
+import { uuidv7 } from "npm:uuidv7";
 
 export class CommentFilterService {
   private dbService = new DatabaseService();
@@ -25,22 +26,25 @@ export class CommentFilterService {
         }
       }
 
+      // Sanitize content
+      const sanitizedContent = this.filterService.sanitizeContent(data.content);
+      
       // Load filter keywords
       const keywords = await this.dbService.getFilterKeywords();
       
       // Check content against keywords
-      const filterResult = this.filterService.checkContent(data.content, keywords);
+      const filterResult = this.filterService.checkContent(sanitizedContent, keywords);
 
       // Hash password
       const passwordHash = await this.passwordService.hashPassword(data.password);
 
-      const commentId = data.comment_id || nanoid(10);
+      const commentId = data.comment_id || uuidv7();
       const status = filterResult.flagged ? 'flagged' : 'approved';
 
       if (data.comment_id) {
         // Update existing comment
         await this.dbService.updateComment(data.comment_id, {
-          content: data.content,
+          content: sanitizedContent,
           status,
           password_hash: passwordHash,
           updated_at: new Date().toISOString()
@@ -53,7 +57,7 @@ export class CommentFilterService {
           parent_comment_id: data.parent_comment_id,
           username: data.username,
           password_hash: passwordHash,
-          content: data.content,
+          content: sanitizedContent,
           status,
           ip_address: null, // Will be set by database trigger if needed
           user_agent: null,
