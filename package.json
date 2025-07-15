@@ -10,6 +10,7 @@
     "@supabase/storage-js": "^2.7.1",
     "@supabase/supabase-js": "^2.51.0",
     "deno": "^2.4.1",
-    "nanoid": "^5.1.5"
+    "nanoid": "^5.1.5",
+    "zod": "^4.0.5"
   }
 }
