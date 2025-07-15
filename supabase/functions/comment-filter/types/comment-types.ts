@@ -1,11 +1,4 @@
-export interface CommentFilterRequest {
-  post_id: string;
-  username: string;
-  password: string;
-  content: string;
-  parent_comment_id?: string;
-  comment_id?: string; // For updates
-}
+// CommentFilterRequest is now exported from validator using Zod
 
 export interface CommentFilterResponse {
   comment_id: string;
