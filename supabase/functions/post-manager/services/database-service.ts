@@ -1,5 +1,6 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { PostManagerRequest, ReferenceData, TocEntry, GeneratedTagData } from "../types/post-types.ts";
+import { nanoid } from "npm:nanoid";
 
 export class DatabaseService {
   private supabase;
@@ -15,7 +16,7 @@ export class DatabaseService {
       .from("post")
       .insert({
         id: postId,
-        user_id: data.user_id || "admin",
+        user_id: "admin",
         title: data.title,
         content: data.content,
         abstract: data.abstract,
@@ -56,7 +57,7 @@ export class DatabaseService {
     if (references.length === 0) return 0;
 
     const referencesToInsert = references.map((ref) => ({
-      id: crypto.randomUUID(),
+      id: nanoid(10),
       post_id: postId,
       text: ref.text,
       url: ref.url || null,
@@ -90,7 +91,7 @@ export class DatabaseService {
     if (tocEntries.length === 0) return 0;
 
     const tocToInsert = tocEntries.map((toc) => ({
-      id: crypto.randomUUID(),
+      id: nanoid(10),
       post_id: postId,
       level: toc.level,
       title: toc.title,
