@@ -2,6 +2,7 @@ import { PostManagerRequest, PostManagerResponse } from "../types/post-types.ts"
 import { DatabaseService } from "./database-service.ts";
 import { TocService } from "./toc-service.ts";
 import { SearchService } from "./search-service.ts";
+import { nanoid } from "npm:nanoid";
 
 export class PostService {
   private dbService = new DatabaseService();
@@ -9,7 +10,7 @@ export class PostService {
   private searchService = new SearchService();
 
   async createPost(data: PostManagerRequest): Promise<PostManagerResponse> {
-    const postId = crypto.randomUUID();
+    const postId = nanoid(10);
     const tocEntries = this.tocService.generateToc(data.content);
 
     try {
