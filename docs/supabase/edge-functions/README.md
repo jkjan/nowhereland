@@ -2,8 +2,11 @@
 
 ## How to develop edge functions
 
+
+<a href="https://supabase.com/docs/guides/functions/quickstart" target="_blank">Getting Started with Edge Functions</a>
 <a href="https://supabase.com/docs/guides/functions/development-tips" target="_blank">Development tips</a>
-https://supabase.com/docs/guides/functions/unit-test
+<a href="https://supabase.com/docs/guides/functions/unit-test" target="_blank">Testing your Edge Functions</a>
+<a href="https://supabase.com/docs/guides/functions/auth" target="_blank">Integrating With Supabase Auth</a>
 
 ## Function List
 
