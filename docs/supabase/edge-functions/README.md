@@ -13,14 +13,17 @@
 1. **post-manager** - Create/update posts with references, TOC, and search indexing
 2. **search-handler** - Handle search requests and return results
 3. **comment-filter** - Filter comments based on keywords
-4. **about-me** - Handle about me update
-5. **comment-notifications** - Update flagged comment notifications
-6. **image-processor** - Process and convert uploaded images
-7. **media-cdn** - Serve images with dynamic resizing
-8. **ai-tag-generator** - Generate tags using Claude Haiku 3
-9. **ai-abstract-generator** - Generate abstracts using Claude Haiku 3
-10. **view-tracker** - Track post views and dwell time
-11. **analytics-aggregator** - Aggregate analytics data periodically
+4. **comment-delete** - Check if password matches or admin, and delete comment
+5. **comment-modify** - Check if password matches or is admin, and do **comment-filter**
+6. **about-me** - Handle about me update
+7. **comment-notifications** - Update flagged comment notifications
+8. **image-processor** - Process and convert uploaded images
+9. **media-cdn** - Serve images with dynamic resizing
+10. **ai-tag-generator** - Generate tags using Claude Haiku 3
+11. **ai-abstract-generator** - Generate abstracts using Claude Haiku 3
+12. **view-tracker** - Track post views and dwell time
+13. **contact-click** - Track clicks for contact
+14. **analytics-aggregator** - Aggregate analytics data periodically
 
 ---
 
@@ -109,6 +112,8 @@ export default async function(req: Request) {
 - Check comment content against keyword list
 - Support case-sensitive/insensitive matching
 - Return approval status (approved/flagged)
+- Decrypt password
+- Add comment if not filtered / Update if comment_id is transfered
 - Handle keyword pattern matching
 
 ```typescript
