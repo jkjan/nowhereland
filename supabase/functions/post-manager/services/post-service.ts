@@ -37,7 +37,7 @@ export class PostService {
     }
   }
 
-  async updatePost(data: PostManagerRequest & { post_id: string }): Promise<PostManagerResponse> {
+  async updatePost(userId: string, data: PostManagerRequest & { post_id: string }): Promise<PostManagerResponse> {
     const tocEntries = data.content ? this.tocService.generateToc(data.content) : [];
 
     try {
