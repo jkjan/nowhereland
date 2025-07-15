@@ -31,7 +31,7 @@ Deno.serve(async (req: Request) => {
   const token = authHeader.replace('Bearer ', '')
   
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const supabaseServiceKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
   
   const { data: userData } = await supabaseClient.auth.getUser(token)
@@ -62,7 +62,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (req.method === "PATCH") {
-      const result = await postService.updatePost(data as PostManagerRequest & { post_id: string });
+      const result = await postService.updatePost(userData.user.id, data as PostManagerRequest & { post_id: string });
       return new Response(JSON.stringify(result), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }

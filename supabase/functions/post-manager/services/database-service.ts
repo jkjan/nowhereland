@@ -67,7 +67,7 @@ export class DatabaseService {
     if (references.length === 0) return 0;
 
     const referencesToInsert = references.map((ref) => ({
-      id: nanoid(10),
+      id: uuidv7(),
       post_id: postId,
       text: ref.text,
       url: ref.url || null,
@@ -98,7 +98,7 @@ export class DatabaseService {
     }
 
     const referencesToUpsert = references.map((ref) => ({
-      id: nanoid(10),
+      id: uuidv7(),
       post_id: postId,
       text: ref.text,
       url: ref.url || null,
@@ -129,7 +129,7 @@ export class DatabaseService {
     if (tocEntries.length === 0) return 0;
 
     const tocToInsert = tocEntries.map((toc) => ({
-      id: nanoid(10),
+      id: uuidv7(),
       post_id: postId,
       level: toc.level,
       title: toc.title,
@@ -159,7 +159,7 @@ export class DatabaseService {
     }
 
     const tocToUpsert = tocEntries.map((toc) => ({
-      id: nanoid(10),
+      id: uuidv7(),
       post_id: postId,
       level: toc.level,
       title: toc.title,
