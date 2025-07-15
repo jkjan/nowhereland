@@ -9,13 +9,13 @@ export class PostService {
   private tocService = new TocService();
   private searchService = new SearchService();
 
-  async createPost(data: PostManagerRequest): Promise<PostManagerResponse> {
+  async createPost(userId: string, data: PostManagerRequest): Promise<PostManagerResponse> {
     const postId = nanoid(10);
     const tocEntries = this.tocService.generateToc(data.content);
 
     try {
       // Create post in database
-      await this.dbService.insertPost(postId, data);
+      await this.dbService.insertPost(postId, userId, data);
       
       // Create related data
       const referencesCreated = await this.dbService.insertReferences(postId, data.references || []);
