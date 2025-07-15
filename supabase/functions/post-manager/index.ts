@@ -1,4 +1,3 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { PostService } from "./services/post-service.ts";
 import { validatePostRequest } from "./validators/post-validator.ts";
@@ -9,6 +8,14 @@ const postService = new PostService();
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  // Check for supported methods before parsing JSON
+  if (!["POST", "PATCH"].includes(req.method)) {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 
   try {
@@ -38,10 +45,8 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    // This should never be reached due to method check above
+    throw new Error("Unexpected method reached handler");
 
   } catch (error) {
     console.error("Error in post-manager:", error);
