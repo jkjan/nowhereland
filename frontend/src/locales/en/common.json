@@ -1,0 +1,42 @@
+{
+  "navigation": {
+    "home": "Home",
+    "aboutMe": "About Me",
+    "admin": "Admin",
+    "writePost": "Write Post",
+    "settings": "Settings",
+    "dashboard": "Dashboard"
+  },
+  "search": {
+    "placeholder": "Enter search terms...",
+    "clear": "Clear",
+    "noResults": "No search results found",
+    "loading": "Searching..."
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode",
+    "toggle": "Toggle theme"
+  },
+  "language": {
+    "korean": "한국어",
+    "english": "English",
+    "toggle": "Toggle language"
+  },
+  "post": {
+    "readMore": "Read more",
+    "viewCount": "{{count}} views",
+    "published": "Published",
+    "tags": "Tags"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{current}} of {{total}}"
+  },
+  "loading": {
+    "posts": "Loading posts...",
+    "search": "Searching...",
+    "general": "Loading..."
+  }
+}

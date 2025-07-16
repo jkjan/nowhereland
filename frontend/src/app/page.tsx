@@ -1,103 +1,163 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import SearchBar from '@/components/home/SearchBar';
+import PostList from '@/components/home/PostList';
+import FixedTags from '@/components/home/FixedTags';
+import { useTranslation } from '@/lib/i18n';
+
+// Mock data for development
+const mockPosts = [
+  {
+    id: '1',
+    title: '첫 번째 블로그 포스트',
+    abstract: '이것은 첫 번째 블로그 포스트의 요약입니다. 여기에는 포스트의 주요 내용이 간략하게 소개됩니다.',
+    published_at: '2024-01-15T10:00:00Z',
+    view_count: 142,
+    tags: ['개발', '블로그', 'Next.js'],
+  },
+  {
+    id: '2',
+    title: 'React 18의 새로운 기능들',
+    abstract: 'React 18에서 도입된 Concurrent Features와 Suspense의 개선사항에 대해 알아봅시다.',
+    published_at: '2024-01-10T14:30:00Z',
+    view_count: 256,
+    tags: ['React', '개발', '프론트엔드'],
+  },
+  {
+    id: '3',
+    title: 'TypeScript로 더 안전한 코드 작성하기',
+    abstract: 'TypeScript의 고급 기능을 활용하여 타입 안전성을 높이고 개발 생산성을 향상시키는 방법을 소개합니다.',
+    published_at: '2024-01-05T09:15:00Z',
+    view_count: 189,
+    tags: ['TypeScript', '개발', '코드품질'],
+  },
+];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  // const { t } = useTranslation(); // Will be used when implementing search functionality
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [posts, setPosts] = useState(mockPosts);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      if (query.trim() === '') {
+        setPosts(mockPosts);
+      } else {
+        const filteredPosts = mockPosts.filter(post =>
+          post.title.toLowerCase().includes(query.toLowerCase()) ||
+          post.abstract.toLowerCase().includes(query.toLowerCase()) ||
+          post.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+        );
+        setPosts(filteredPosts);
+      }
+      setLoading(false);
+    }, 800);
+  };
+
+  const handleTagClick = (tag: string) => {
+    let newSelectedTags;
+    if (selectedTags.includes(tag)) {
+      newSelectedTags = selectedTags.filter(t => t !== tag);
+    } else {
+      newSelectedTags = [...selectedTags, tag];
+    }
+    setSelectedTags(newSelectedTags);
+    
+    // Add tag to search query
+    const tagQuery = newSelectedTags.map(t => `#${t}`).join(' ');
+    setSearchQuery(tagQuery);
+    handleSearch(tagQuery);
+  };
+
+  const handleLoadMore = () => {
+    setLoadingMore(true);
+    
+    // Simulate API call with cursor
+    setTimeout(() => {
+      const morePosts = [
+        {
+          id: `more-${Date.now()}`,
+          title: '더 많은 포스트 ' + (posts.length + 1),
+          abstract: '무한 스크롤로 로드된 추가 포스트입니다.',
+          published_at: new Date().toISOString(),
+          view_count: Math.floor(Math.random() * 100),
+          tags: ['추가', '무한스크롤'],
+        },
+        {
+          id: `more-${Date.now() + 1}`,
+          title: '또 다른 포스트 ' + (posts.length + 2),
+          abstract: '계속해서 로드되는 포스트입니다.',
+          published_at: new Date().toISOString(),
+          view_count: Math.floor(Math.random() * 100),
+          tags: ['더보기', '스크롤'],
+        }
+      ];
+      
+      setPosts(prev => [...prev, ...morePosts]);
+      setCursor(`cursor-${Date.now()}`);
+      setLoadingMore(false);
+      
+      // Simulate end of data after 10 posts
+      if (posts.length >= 10) {
+        setHasMore(false);
+      }
+    }, 1000);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="grid grid-cols-4 lg:grid-cols-12 gap-6">
+        {/* Fixed Tags - Desktop Left Sidebar */}
+        <div className="hidden lg:block lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
+          <FixedTags 
+            onTagClick={handleTagClick}
+            selectedTags={selectedTags}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        {/* Main Content */}
+        <div className="col-span-4 lg:col-span-8">
+          {/* Search Bar */}
+          <div className="mb-6">
+            <SearchBar 
+              onSearch={handleSearch}
+              initialValue={searchQuery}
+            />
+          </div>
+
+          {/* Fixed Tags - Mobile Horizontal */}
+          <div className="lg:hidden mb-6">
+            <FixedTags 
+              onTagClick={handleTagClick}
+              selectedTags={selectedTags}
+            />
+          </div>
+
+          {/* Post List */}
+          <PostList
+            posts={posts}
+            loading={loading}
+            loadingMore={loadingMore}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        </div>
+
+        {/* Right Sidebar - Reserved for future use */}
+        <div className="hidden lg:block lg:col-span-2">
+          {/* Could be used for: recent posts, popular tags, etc. */}
+        </div>
+      </div>
     </div>
   );
 }
