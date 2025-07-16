@@ -25,11 +25,10 @@ const config: Config = {
         'accent': 'var(--color-accent)',
       },
       screens: {
-        'xs': '480px',
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
+        // ui.md breakpoints: xs < 600px (default), md 600-840px, lg 840-1200px
+        'md': '600px',  // 600 <= width < 840 (md in ui.md)
+        'lg': '840px',  // 840 <= width < 1200 (lg in ui.md)  
+        'xl': '1200px', // 1200 <= width
         '2xl': '1536px',
       },
       maxWidth: {

@@ -4,20 +4,25 @@ export type Theme = 'light' | 'dark';
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>('light');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Check localStorage for saved theme preference
-    const savedTheme = localStorage.getItem('theme') as Theme;
+    setMounted(true);
     
-    if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
-      setTheme(savedTheme);
-      applyTheme(savedTheme);
-    } else {
-      // Check system preference
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      setTheme(systemTheme);
-      applyTheme(systemTheme);
-      localStorage.setItem('theme', systemTheme);
+    if (typeof window !== 'undefined') {
+      // Check localStorage for saved theme preference
+      const savedTheme = localStorage.getItem('theme') as Theme;
+      
+      if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
+        setTheme(savedTheme);
+        applyTheme(savedTheme);
+      } else {
+        // Check system preference
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        setTheme(systemTheme);
+        applyTheme(systemTheme);
+        localStorage.setItem('theme', systemTheme);
+      }
     }
   }, []);
 
@@ -34,8 +39,10 @@ export function useTheme() {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     applyTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', newTheme);
+    }
   };
 
-  return { theme, toggleTheme };
+  return { theme, toggleTheme, mounted };
 }
