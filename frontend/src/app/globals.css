@@ -8,6 +8,11 @@
   --color-neutral: #A7A8AA;
   --border-radius: 6px;
   
+  /* Responsive spacing system */
+  --spacing-margin: 16px; /* xs default */
+  --spacing-gutter: 16px; /* xs default */
+  --spacing-component: 12px; /* smaller gap between components */
+  
   /* Extended color palette for better hierarchy */
   --color-surface: #ffffff;
   --color-surface-variant: #f8f7f4;
@@ -80,6 +85,23 @@
 @theme inline {
   --font-sans: ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+/* Responsive spacing breakpoints */
+@media (min-width: 600px) {
+  :root {
+    --spacing-margin: 20px; /* md */
+    --spacing-gutter: 16px; /* md */
+    --spacing-component: 16px;
+  }
+}
+
+@media (min-width: 840px) {
+  :root {
+    --spacing-margin: 24px; /* lg */
+    --spacing-gutter: 24px; /* lg */
+    --spacing-component: 20px;
+  }
 }
 
 body {

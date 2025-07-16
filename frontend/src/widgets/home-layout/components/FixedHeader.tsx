@@ -17,9 +17,14 @@ export function FixedHeader({
   searchQuery
 }: FixedHeaderProps) {
   return (
-    <div className="bg-primary/95 backdrop-blur-sm z-10 pb-6 mb-6 flex-shrink-0">
+    <div 
+      className="bg-primary/95 backdrop-blur-sm z-10 flex-shrink-0"
+      style={{ 
+        paddingBottom: `var(--spacing-component)`,
+      }}
+    >
       {/* Search Bar */}
-      <div className="mb-6">
+      <div>
         <SearchBar 
           onSearch={onSearch}
           initialValue={searchQuery}
@@ -27,7 +32,12 @@ export function FixedHeader({
       </div>
 
       {/* Fixed Tags - Mobile Horizontal (xs only) */}
-      <div className="md:hidden xs: mt-6">
+      <div 
+        className="md:hidden"
+        style={{ 
+          marginTop: `var(--spacing-component)` 
+        }}
+      >
         <FixedTags 
           onTagClick={onTagClick}
           selectedTags={selectedTags}
