@@ -5,23 +5,17 @@ import { Skeleton } from '@/shared/ui/skeleton';
 import { Card } from '@/shared/ui/card';
 import { useInfiniteScroll } from '@/shared/hooks';
 import { PostItem } from '../post-item';
-
-interface Post {
-  id: string;
-  title: string;
-  abstract: string;
-  thumbnail?: string;
-  published_at: string;
-  view_count: number;
-  tags: string[];
-}
+import { Post } from '@/entities/post';
+import { PostListErrorFallback } from '@/shared/ui/error-fallback';
 
 interface PostListProps {
   posts?: Post[];
   loading?: boolean;
   loadingMore?: boolean;
   hasMore?: boolean;
+  error?: string | null;
   onLoadMore?: () => void;
+  onRetry?: () => void;
 }
 
 function PostSkeleton() {
@@ -54,7 +48,9 @@ export default function PostList({
   loading = false,
   loadingMore = false,
   hasMore = false,
-  onLoadMore
+  error = null,
+  onLoadMore,
+  onRetry
 }: PostListProps) {
   const { t } = useTranslation();
   
@@ -63,6 +59,12 @@ export default function PostList({
     hasMore,
     loadingMore
   );
+
+  // Show error state
+  if (error && posts.length === 0) {
+    const translatedError = t(`error.${error}`);
+    return <PostListErrorFallback error={new Error(translatedError)} resetError={onRetry} />;
+  }
 
   if (loading && posts.length === 0) {
     return (

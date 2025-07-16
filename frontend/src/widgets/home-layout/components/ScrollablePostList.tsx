@@ -2,14 +2,16 @@
 
 import { PostList } from '@/widgets/post-list';
 import { Post } from '@/entities/post';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 interface ScrollablePostListProps {
   posts: Post[];
   loading: boolean;
   loadingMore: boolean;
   hasMore: boolean;
+  error: string | null;
   onLoadMore: () => void;
+  onRetry: () => void;
 }
 
 export function ScrollablePostList({
@@ -17,7 +19,9 @@ export function ScrollablePostList({
   loading,
   loadingMore,
   hasMore,
-  onLoadMore
+  error,
+  onLoadMore,
+  onRetry
 }: ScrollablePostListProps) {
   const [shadowOpacity, setShadowOpacity] = useState(0);
 
@@ -48,7 +52,9 @@ export function ScrollablePostList({
           loading={loading}
           loadingMore={loadingMore}
           hasMore={hasMore}
+          error={error}
           onLoadMore={onLoadMore}
+          onRetry={onRetry}
         />
       </div>
     </div>

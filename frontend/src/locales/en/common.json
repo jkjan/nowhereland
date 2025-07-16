@@ -41,5 +41,15 @@
     "posts": "Loading posts...",
     "search": "Searching...",
     "general": "Loading..."
+  },
+  "error": {
+    "general": "Something went wrong",
+    "unexpected": "We're sorry, but something unexpected happened.",
+    "postsLoadFailed": "Failed to load posts",
+    "searchFailed": "Failed to search posts. Please try again.",
+    "loadMoreFailed": "Failed to load more posts. Please try again.",
+    "unableToLoadPosts": "Unable to load posts. Please try again.",
+    "tryAgain": "Try again",
+    "retry": "Retry"
   }
 }
