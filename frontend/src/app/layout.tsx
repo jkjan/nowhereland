@@ -23,9 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className="antialiased">
+      <body className="antialiased h-screen overflow-hidden">
         <Header />
-        <main>
+        <main className="h-[calc(100vh-64px)]">
           {children}
         </main>
       </body>
