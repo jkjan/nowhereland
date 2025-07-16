@@ -9,7 +9,7 @@ export class SearchService {
   }
 
   async performSearch(params: SearchRequest): Promise<{ results: SearchResult[]; total: number; engine: 'postgresql' | 'opensearch' }> {
-    // Check if OpenSearch is enabled
+    // Check if OpenSearch is enabled (default to false if can't access setting)
     const isOpensearchEnabled = await this.databaseService.getSiteSetting('is_opensearch_enabled');
 
     if (isOpensearchEnabled === 'true') {
@@ -22,7 +22,7 @@ export class SearchService {
       };
     }
 
-    // Use PostgreSQL full-text search
+    // Use PostgreSQL full-text search (default behavior)
     return await this.performPostgreSQLSearch(params);
   }
 
@@ -87,7 +87,11 @@ export class SearchService {
 
     if (error) {
       console.error('PostgreSQL search error:', error);
-      throw new Error('Database search failed');
+      return {
+        results: [],
+        total: 0,
+        engine: 'postgresql' as const
+      };
     }
 
     // Format results
