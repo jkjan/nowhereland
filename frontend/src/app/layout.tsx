@@ -25,7 +25,7 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body className="antialiased">
         <Header />
-        <main className="min-h-screen">
+        <main>
           {children}
         </main>
       </body>

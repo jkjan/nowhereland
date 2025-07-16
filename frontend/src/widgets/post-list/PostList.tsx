@@ -1,13 +1,9 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { Card } from '@/shared/ui/card';
 import { useInfiniteScroll } from '@/shared/hooks';
-import { cn } from '@/lib/utils';
-import Tag from '@/shared/ui/tag';
 import { PostItem } from '../post-item';
 
 interface Post {

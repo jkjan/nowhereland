@@ -1,19 +1,8 @@
 'use client';
 
-import { SearchBar } from '@/widgets/search-bar';
 import { FixedTags } from '@/widgets/fixed-tags';
-import { PostList } from '@/widgets/post-list';
-import { useScrollShadow } from '@/shared/hooks';
-
-interface Post {
-  id: string;
-  title: string;
-  abstract: string;
-  thumbnail?: string;
-  published_at: string;
-  view_count: number;
-  tags: string[];
-}
+import { Post } from '@/entities/post';
+import { FixedHeader, ScrollablePostList } from './components';
 
 interface HomeLayoutProps {
   posts: Post[];
@@ -38,39 +27,31 @@ export default function HomeLayout({
   selectedTags,
   searchQuery
 }: HomeLayoutProps) {
-  const hasScrolled = useScrollShadow({ threshold: 10 });
-
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-5 lg:px-6 py-8">
       <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-4 md:gap-4 lg:gap-6">
         {/* Fixed Tags - Left Sidebar beyond xs (md+) */}
         <div className="hidden md:block lg:col-start-2 md:col-span-1 lg:col-span-1">
-          <FixedTags 
-            onTagClick={onTagClick}
-            selectedTags={selectedTags}
-          />
-        </div>
-
-        {/* Main Content Area */}
-        <div className="col-span-4 md:col-span-7 lg:col-span-9">
-          {/* Search Bar - Fixed position with shadow when scrolled */}
-          <div className={`mb-6 transition-shadow duration-300 ${hasScrolled ? 'shadow-md' : ''}`}>
-            <SearchBar 
-              onSearch={onSearch}
-              initialValue={searchQuery}
-            />
-          </div>
-
-          {/* Fixed Tags - Mobile Horizontal (xs only) - Fixed position */}
-          <div className="md:hidden mb-6">
+          <div className="sticky top-8">
             <FixedTags 
               onTagClick={onTagClick}
               selectedTags={selectedTags}
             />
           </div>
+        </div>
 
-          {/* Post List - This is the ONLY scrollable part */}
-          <PostList
+        {/* Main Content Area */}
+        <div className="col-span-4 md:col-span-7 lg:col-span-9">
+          {/* Fixed Header Area - Search Bar + Tags */}
+          <FixedHeader
+            onSearch={onSearch}
+            onTagClick={onTagClick}
+            selectedTags={selectedTags}
+            searchQuery={searchQuery}
+          />
+
+          {/* Scrollable Post List */}
+          <ScrollablePostList
             posts={posts}
             loading={loading}
             loadingMore={loadingMore}
