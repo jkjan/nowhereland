@@ -28,11 +28,11 @@ export default function HomeLayout({
   searchQuery
 }: HomeLayoutProps) {
   return (
-    <div className="h-full max-w-7xl mx-auto px-4 md:px-5 lg:px-6 py-8">
-      <div className="h-full grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-4 md:gap-4 lg:gap-6">
+    <div className="h-full max-w-7xl mx-auto px-6 py-6">
+      <div className="h-full grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-6">
         {/* Fixed Tags - Left Sidebar beyond xs (md+) */}
         <div className="hidden md:block lg:col-start-2 md:col-span-1 lg:col-span-1">
-          <div className="sticky top-8">
+          <div className="sticky top-6">
             <FixedTags 
               onTagClick={onTagClick}
               selectedTags={selectedTags}
