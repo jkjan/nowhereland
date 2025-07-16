@@ -87,7 +87,11 @@ export class SearchService {
 
     if (error) {
       console.error('PostgreSQL search error:', error);
-      throw new Error('Database search failed');
+      return {
+        results: [],
+        total: 0,
+        engine: 'postgresql' as const
+      };
     }
 
     // Format results
