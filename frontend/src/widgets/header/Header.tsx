@@ -9,14 +9,14 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="w-full bg-primary border-b border-neutral/20 sticky top-0 z-[9999] transition-all duration-300">
+    <header className="w-full bg-background/95 backdrop-blur-md shadow-md sticky top-0 z-[9999] transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 md:px-5 lg:px-6">
         <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-4 md:gap-4 lg:gap-6 items-center h-16">
           {/* Logo - span 2 according to ui.md */}
           <div className="col-span-2">
             <Link 
               href="/" 
-              className="text-xl font-bold text-secondary hover:text-accent transition-colors duration-200"
+              className="text-xl font-bold text-foreground hover:text-primary transition-colors duration-200"
             >
               Nowhere Land
             </Link>
@@ -27,7 +27,7 @@ export default function Header() {
             {/* Theme Toggle - Visible beyond xs (md+) according to ui.md */}
             <button
               onClick={toggleTheme}
-              className="hidden md:flex p-2 rounded-theme bg-transparent hover:bg-neutral/10 transition-colors duration-200"
+              className="hidden md:flex p-2 rounded-theme text-card-foreground hover:-translate-y-0.5 transition-all duration-200"
               title={t('theme.toggle')}
             >
               {theme === 'light' ? (
@@ -44,7 +44,7 @@ export default function Header() {
             {/* About Me / Admin */}
             <Link
               href="/about-me"
-              className="p-2 rounded-theme bg-transparent hover:bg-neutral/10 transition-colors duration-200 text-secondary font-medium"
+              className="p-2 rounded-theme text-card-foreground font-medium hover:bg-neutral-200 hover:text-neutral-600 transition-all duration-200"
             >
               {t('navigation.aboutMe')}
             </Link>
