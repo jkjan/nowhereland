@@ -9,9 +9,11 @@ interface HomeLayoutProps {
   loading: boolean;
   loadingMore: boolean;
   hasMore: boolean;
+  error: string | null;
   onLoadMore: () => void;
   onSearch: (query: string) => void;
   onTagClick: (tag: string) => void;
+  onRetry: () => void;
   selectedTags: string[];
   searchQuery: string;
 }
@@ -21,9 +23,11 @@ export default function HomeLayout({
   loading,
   loadingMore,
   hasMore,
+  error,
   onLoadMore,
   onSearch,
   onTagClick,
+  onRetry,
   selectedTags,
   searchQuery
 }: HomeLayoutProps) {
@@ -71,7 +75,9 @@ export default function HomeLayout({
             loading={loading}
             loadingMore={loadingMore}
             hasMore={hasMore}
+            error={error}
             onLoadMore={onLoadMore}
+            onRetry={onRetry}
           />
         </div>
 

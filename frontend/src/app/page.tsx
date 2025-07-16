@@ -11,6 +11,8 @@ export default function Home() {
     loading,
     loadingMore,
     hasMore,
+    error,
+    resetError,
     handleSearch,
     handleTagClick,
     handleLoadMore,
@@ -22,9 +24,11 @@ export default function Home() {
       loading={loading}
       loadingMore={loadingMore}
       hasMore={hasMore}
+      error={error}
       onLoadMore={handleLoadMore}
       onSearch={handleSearch}
       onTagClick={handleTagClick}
+      onRetry={resetError}
       selectedTags={selectedTags}
       searchQuery={searchQuery}
     />
