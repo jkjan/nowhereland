@@ -12,23 +12,29 @@ const translations = {
 
 export function useTranslation(namespace: 'common' = 'common') {
   const [language, setLanguage] = useState<Language>('ko');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Check localStorage for saved language preference
-    const savedLanguage = localStorage.getItem('language') as Language;
-    if (savedLanguage && ['ko', 'en'].includes(savedLanguage)) {
-      setLanguage(savedLanguage);
-    } else {
-      // Default to Korean
-      setLanguage('ko');
-      localStorage.setItem('language', 'ko');
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem('language') as Language;
+      if (savedLanguage && ['ko', 'en'].includes(savedLanguage)) {
+        setLanguage(savedLanguage);
+      } else {
+        // Default to Korean
+        setLanguage('ko');
+        localStorage.setItem('language', 'ko');
+      }
     }
   }, []);
 
   const toggleLanguage = () => {
     const newLanguage = language === 'ko' ? 'en' : 'ko';
     setLanguage(newLanguage);
-    localStorage.setItem('language', newLanguage);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('language', newLanguage);
+    }
   };
 
   const t = (key: string, params?: Record<string, string | number>) => {
@@ -54,5 +60,5 @@ export function useTranslation(namespace: 'common' = 'common') {
     return value;
   };
 
-  return { t, language, toggleLanguage };
+  return { t, language, toggleLanguage, mounted };
 }

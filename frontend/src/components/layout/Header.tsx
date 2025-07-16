@@ -5,14 +5,14 @@ import { useTranslation } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
 
 export default function Header() {
-  const { t, language, toggleLanguage } = useTranslation();
+  const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="w-full bg-primary border-b border-neutral/20 sticky top-0 z-[9999] transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-12 gap-4 items-center h-16">
-          {/* Logo - span 2 */}
+      <div className="max-w-7xl mx-auto px-4 md:px-5 lg:px-6">
+        <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-4 md:gap-4 lg:gap-6 items-center h-16">
+          {/* Logo - span 2 according to ui.md */}
           <div className="col-span-2">
             <Link 
               href="/" 
@@ -22,12 +22,12 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Navigation - spans remaining */}
-          <div className="col-span-10 flex items-center justify-end gap-4">
-            {/* Theme Toggle */}
+          {/* Navigation - remaining columns */}
+          <div className="col-span-2 md:col-span-6 lg:col-span-10 flex items-center justify-end gap-2">
+            {/* Theme Toggle - Visible beyond xs (md+) according to ui.md */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-theme bg-transparent hover:bg-neutral/10 transition-colors duration-200"
+              className="hidden md:flex p-2 rounded-theme bg-transparent hover:bg-neutral/10 transition-colors duration-200"
               title={t('theme.toggle')}
             >
               {theme === 'light' ? (
@@ -39,15 +39,6 @@ export default function Header() {
                   <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                 </svg>
               )}
-            </button>
-
-            {/* Language Toggle */}
-            <button
-              onClick={toggleLanguage}
-              className="p-2 rounded-theme bg-transparent hover:bg-neutral/10 transition-colors duration-200 text-secondary text-sm font-medium"
-              title={t('language.toggle')}
-            >
-              {language === 'ko' ? 'EN' : '한'}
             </button>
 
             {/* About Me / Admin */}

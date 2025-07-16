@@ -16,12 +16,12 @@ export default function FixedTags({
   
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium text-secondary mb-3 hidden lg:block">
+      <h3 className="text-sm font-medium text-secondary mb-3 hidden md:block">
         태그
       </h3>
       
-      {/* Desktop: Vertical list */}
-      <div className="hidden lg:flex lg:flex-col gap-2">
+      {/* Beyond xs: Vertical list */}
+      <div className="hidden md:flex md:flex-col gap-2">
         {tags.map((tag) => (
           <button
             key={tag}
@@ -37,8 +37,8 @@ export default function FixedTags({
         ))}
       </div>
       
-      {/* Mobile: Horizontal scroll */}
-      <div className="lg:hidden">
+      {/* xs only: Horizontal scroll */}
+      <div className="md:hidden">
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
           {tags.map((tag) => (
             <button

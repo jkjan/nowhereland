@@ -63,10 +63,10 @@ function PostItem({ post }: { post: Post }) {
                 alt={post.title}
                 width={128}
                 height={128}
-                className="w-24 h-24 lg:w-32 lg:h-32 object-cover rounded-theme"
+                className="w-20 h-20 xs:w-24 xs:h-24 lg:w-32 lg:h-32 object-cover rounded-theme"
               />
             ) : (
-              <div className="w-24 h-24 lg:w-32 lg:h-32 bg-neutral/10 rounded-theme flex items-center justify-center">
+              <div className="w-20 h-20 xs:w-24 xs:h-24 lg:w-32 lg:h-32 bg-neutral/10 rounded-theme flex items-center justify-center">
                 <svg className="w-8 h-8 text-neutral" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                 </svg>
@@ -79,12 +79,12 @@ function PostItem({ post }: { post: Post }) {
             <h2 className="text-lg font-semibold text-secondary group-hover:text-accent transition-colors duration-200 line-clamp-1">
               {post.title}
             </h2>
-            <p className="text-neutral mt-1 line-clamp-2 text-sm lg:text-base">
+            <p className="text-neutral mt-1 line-clamp-2 text-sm xs:text-sm lg:text-base">
               {post.abstract}
             </p>
             
             {/* Metadata */}
-            <div className="flex items-center gap-4 mt-2 text-xs lg:text-sm text-neutral">
+            <div className="flex items-center gap-2 xs:gap-4 mt-2 text-xs xs:text-xs lg:text-sm text-neutral">
               <span>{new Date(post.published_at).toLocaleDateString()}</span>
               <span>{t('post.viewCount', { count: post.view_count })}</span>
             </div>
@@ -150,17 +150,17 @@ export default function PostList({
         ))}
       </div>
 
-      {/* Load More */}
+      {/* Load More - ui.md: Button is accent colored */}
       {hasMore && (
         <div className="flex justify-center mt-8">
           <button
             onClick={onLoadMore}
             disabled={loadingMore}
-            className="px-6 py-3 bg-primary border border-neutral/20 rounded-theme text-secondary hover:border-accent/30 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-accent text-primary rounded-theme hover:bg-accent/90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral disabled:text-secondary"
           >
             {loadingMore ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-neutral/20 border-t-accent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                 <span>{t('loading.posts')}</span>
               </div>
             ) : (
