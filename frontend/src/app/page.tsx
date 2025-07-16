@@ -107,8 +107,8 @@ export default function Home() {
 
         {/* Main Content Area */}
         <div className="col-span-4 md:col-span-7 lg:col-span-9">
-          {/* Search Bar on top - ui.md: width span 10 for lg, 8 for md, 4 for xs */}
-          <div className="mb-6">
+          {/* Search Bar - sticky under header */}
+          <div className="sticky top-16 z-50 bg-background/95 backdrop-blur-sm py-4 mb-6 -mt-8 pt-8">
             <SearchBar 
               onSearch={handleSearch}
               initialValue={searchQuery}
