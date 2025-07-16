@@ -29,6 +29,9 @@
     "published": "Published",
     "tags": "Tags"
   },
+  "posts": {
+    "noMorePosts": "No more posts available."
+  },
   "pagination": {
     "previous": "Previous",
     "next": "Next",

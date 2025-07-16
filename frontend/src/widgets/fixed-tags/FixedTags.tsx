@@ -1,7 +1,6 @@
 'use client';
 
-import { Button } from '@/shared/ui/button';
-import { cn } from '@/lib/utils';
+import Tag from '@/shared/ui/tag';
 
 interface FixedTagsProps {
   tags?: string[];
@@ -24,53 +23,10 @@ export default function FixedTags({
       </h3>
       
       {/* Beyond xs: Vertical list */}
-      <div className="hidden md:flex md:flex-col gap-2">
-        {tags.map((tag) => (
-          <Button
-            key={tag}
-            onClick={() => onTagClick?.(tag)}
-            variant={selectedTags.includes(tag) ? "default" : "outline"}
-            size="sm"
-            className={cn(
-              "justify-start text-left h-auto px-3 py-2 w-fit min-w-0 border-0 transition-all duration-200",
-              selectedTags.includes(tag) 
-                ? "text-white pressed-effect" 
-                : "text-white hover:brightness-90 shadow-sm hover:shadow-md"
-            )}
-            style={{
-              backgroundColor: 'var(--color-accent)',
-              color: 'white'
-            }}
-          >
-            #{tag}
-          </Button>
+      <div className="flex md:flex-col md:overflow-x-auto scrollbar-hide gap-2">
+        {tags.map((tag, index) => (
+          <Tag key={index} tag={tag} onClick={onTagClick} selected={selectedTags.includes(tag)}/>
         ))}
-      </div>
-      
-      {/* xs only: Horizontal scroll */}
-      <div className="md:hidden">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {tags.map((tag) => (
-            <Button
-              key={tag}
-              onClick={() => onTagClick?.(tag)}
-              variant={selectedTags.includes(tag) ? "default" : "outline"}
-              size="sm"
-              className={cn(
-                "whitespace-nowrap flex-shrink-0 h-auto px-3 py-2 w-fit min-w-0 border-0 transition-all duration-200",
-                selectedTags.includes(tag) 
-                  ? "text-white pressed-effect" 
-                  : "text-white hover:brightness-90 shadow-sm hover:shadow-md"
-              )}
-              style={{
-                backgroundColor: 'var(--color-accent)',
-                color: 'white'
-              }}
-            >
-              #{tag}
-            </Button>
-          ))}
-        </div>
       </div>
     </div>
   );

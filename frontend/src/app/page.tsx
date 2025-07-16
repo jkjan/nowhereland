@@ -98,7 +98,7 @@ export default function Home() {
     <div className="max-w-7xl mx-auto px-4 md:px-5 lg:px-6 py-8">
       <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-4 md:gap-4 lg:gap-6">
         {/* Fixed Tags - Left Sidebar beyond xs (md+), width span 2 */}
-        <div className="hidden md:block md:col-span-2 lg:col-span-2 sticky top-24 self-start">
+        <div className="hidden md:block lg:col-start-2 md:col-span-1 lg:col-span-1 sticky top-24 self-start">
           <FixedTags 
             onTagClick={handleTagClick}
             selectedTags={selectedTags}
@@ -106,7 +106,7 @@ export default function Home() {
         </div>
 
         {/* Main Content Area */}
-        <div className="col-span-4 md:col-span-6 lg:col-span-8">
+        <div className="col-span-4 md:col-span-7 lg:col-span-9">
           {/* Search Bar on top - ui.md: width span 10 for lg, 8 for md, 4 for xs */}
           <div className="mb-6">
             <SearchBar 
