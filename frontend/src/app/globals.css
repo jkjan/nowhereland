@@ -1,12 +1,43 @@
 @import "tailwindcss";
 
 :root {
-  /* Light theme (default) */
+  /* Light theme (default) - Expanded palette */
   --color-primary: #f1f0ed;
   --color-secondary: #2D2926;
   --color-accent: #D01C1F;
   --color-neutral: #A7A8AA;
-  --border-radius: 0.5rem;
+  --border-radius: 6px;
+  
+  /* Extended color palette for better hierarchy */
+  --color-surface: #ffffff;
+  --color-surface-variant: #f8f7f4;
+  --color-surface-dim: #e8e7e4;
+  --color-on-surface: #2D2926;
+  --color-on-surface-variant: #6b6968;
+  --color-outline: #d0cfcc;
+  --color-outline-variant: #e8e7e4;
+  
+  /* shadcn variables for light theme */
+  --background: 12 8 6;
+  --foreground: 21 16 14;
+  --card: 0 0 100;
+  --card-foreground: 21 16 14;
+  --popover: 0 0 100;
+  --popover-foreground: 21 16 14;
+  --primary: 0 84 56;
+  --primary-foreground: 0 0 100;
+  --secondary: 10 4 95;
+  --secondary-foreground: 21 16 14;
+  --muted: 10 4 90;
+  --muted-foreground: 21 8 41;
+  --accent: 0 84 56;
+  --accent-foreground: 0 0 100;
+  --destructive: 0 84 60;
+  --destructive-foreground: 0 0 100;
+  --border: 10 4 90;
+  --input: 0 0 100;
+  --ring: 0 84 56;
+  --radius: 6px;
 }
 
 /* Dark theme */
@@ -14,6 +45,36 @@
   --color-primary: #2D2926;
   --color-secondary: #f1f0ed;
   --color-accent: #FF8200;
+  
+  /* Extended color palette for dark theme */
+  --color-surface: #1a1917;
+  --color-surface-variant: #3a3733;
+  --color-surface-dim: #4a453f;
+  --color-on-surface: #f1f0ed;
+  --color-on-surface-variant: #a8a6a3;
+  --color-outline: #6b6968;
+  --color-outline-variant: #4a453f;
+  
+  /* shadcn variables for dark theme */
+  --background: 21 16 14;
+  --foreground: 12 8 6;
+  --card: 25 11 9;
+  --card-foreground: 12 8 6;
+  --popover: 25 11 9;
+  --popover-foreground: 12 8 6;
+  --primary: 30 100 50;
+  --primary-foreground: 25 11 9;
+  --secondary: 25 11 21;
+  --secondary-foreground: 12 8 6;
+  --muted: 25 11 29;
+  --muted-foreground: 21 4 65;
+  --accent: 30 100 50;
+  --accent-foreground: 25 11 9;
+  --destructive: 0 84 60;
+  --destructive-foreground: 12 8 6;
+  --border: 25 11 29;
+  --input: 25 11 9;
+  --ring: 30 100 50;
 }
 
 @theme inline {
@@ -50,4 +111,37 @@ body {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Pressed button effect */
+.pressed-effect {
+  position: relative;
+  box-shadow: 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.4),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.2);
+  transform: translate(1px, 1px);
+}
+
+.pressed-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 40%, transparent 70%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.pressed-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(315deg, rgba(255, 255, 255, 0.05) 0%, transparent 30%);
+  border-radius: inherit;
+  pointer-events: none;
 }

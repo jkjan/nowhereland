@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/layout/Header";
+import { Header } from "@/widgets/header";
 
 export const metadata: Metadata = {
   title: "Nowhere Land",

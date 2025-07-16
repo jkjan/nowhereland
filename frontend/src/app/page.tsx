@@ -1,48 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import SearchBar from '@/components/home/SearchBar';
-import PostList from '@/components/home/PostList';
-import FixedTags from '@/components/home/FixedTags';
-import { useTranslation } from '@/lib/i18n';
+import { SearchBar } from '@/widgets/search-bar';
+import { PostList } from '@/widgets/post-list';
+import { FixedTags } from '@/widgets/fixed-tags';
 
-// Mock data for development
-const mockPosts = [
-  {
-    id: '1',
-    title: '첫 번째 블로그 포스트',
-    abstract: '이것은 첫 번째 블로그 포스트의 요약입니다. 여기에는 포스트의 주요 내용이 간략하게 소개됩니다.',
-    published_at: '2024-01-15T10:00:00Z',
-    view_count: 142,
-    tags: ['개발', '블로그', 'Next.js'],
-  },
-  {
-    id: '2',
-    title: 'React 18의 새로운 기능들',
-    abstract: 'React 18에서 도입된 Concurrent Features와 Suspense의 개선사항에 대해 알아봅시다.',
-    published_at: '2024-01-10T14:30:00Z',
-    view_count: 256,
-    tags: ['React', '개발', '프론트엔드'],
-  },
-  {
-    id: '3',
-    title: 'TypeScript로 더 안전한 코드 작성하기',
-    abstract: 'TypeScript의 고급 기능을 활용하여 타입 안전성을 높이고 개발 생산성을 향상시키는 방법을 소개합니다.',
-    published_at: '2024-01-05T09:15:00Z',
-    view_count: 189,
-    tags: ['TypeScript', '개발', '코드품질'],
-  },
-];
+// Mock data for development - 10 posts initially
+const mockPosts = Array.from({ length: 10 }, (_, i) => ({
+  id: `${i + 1}`,
+  title: `블로그 포스트 ${i + 1}`,
+  abstract: `이것은 ${i + 1}번째 블로그 포스트의 요약입니다. 여기에는 포스트의 주요 내용이 간략하게 소개됩니다.`,
+  published_at: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
+  view_count: Math.floor(Math.random() * 500) + 50,
+  tags: ['개발', '블로그', 'Next.js', 'React', 'TypeScript'].slice(0, Math.floor(Math.random() * 3) + 1),
+}));
 
 export default function Home() {
-  // const { t } = useTranslation(); // Will be used when implementing search functionality
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [posts, setPosts] = useState(mockPosts);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [cursor, setCursor] = useState<string | null>(null);
+  const [, setCursor] = useState<string | null>(null);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);

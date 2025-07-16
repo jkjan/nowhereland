@@ -9,20 +9,43 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Light theme colors
-        'light-primary': '#f1f0ed',
-        'light-secondary': '#2D2926',
-        'light-accent': '#D01C1F',
-        // Dark theme colors
-        'dark-primary': '#2D2926',
-        'dark-secondary': '#f1f0ed',
-        'dark-accent': '#FF8200',
-        // Neutral color
-        'neutral': '#A7A8AA',
-        // Semantic color variables (will be set by theme)
+        // Original theme colors
         'primary': 'var(--color-primary)',
         'secondary': 'var(--color-secondary)',
         'accent': 'var(--color-accent)',
+        'neutral': 'var(--color-neutral)',
+        
+        // Extended color palette
+        'surface': 'var(--color-surface)',
+        'surface-variant': 'var(--color-surface-variant)',
+        'surface-dim': 'var(--color-surface-dim)',
+        'on-surface': 'var(--color-on-surface)',
+        'on-surface-variant': 'var(--color-on-surface-variant)',
+        'outline': 'var(--color-outline)',
+        'outline-variant': 'var(--color-outline-variant)',
+        
+        // shadcn color system
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
       },
       screens: {
         // ui.md breakpoints: xs < 600px (default), md 600-840px, lg 840-1200px
