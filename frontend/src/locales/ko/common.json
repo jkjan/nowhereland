@@ -1,0 +1,42 @@
+{
+  "navigation": {
+    "home": "홈",
+    "aboutMe": "소개",
+    "admin": "관리자",
+    "writePost": "글 쓰기",
+    "settings": "설정",
+    "dashboard": "대시보드"
+  },
+  "search": {
+    "placeholder": "검색어를 입력하세요...",
+    "clear": "지우기",
+    "noResults": "검색 결과가 없습니다",
+    "loading": "검색 중..."
+  },
+  "theme": {
+    "light": "라이트 모드",
+    "dark": "다크 모드",
+    "toggle": "테마 전환"
+  },
+  "language": {
+    "korean": "한국어",
+    "english": "English",
+    "toggle": "언어 전환"
+  },
+  "post": {
+    "readMore": "더 보기",
+    "viewCount": "조회 {{count}}회",
+    "published": "게시됨",
+    "tags": "태그"
+  },
+  "pagination": {
+    "previous": "이전",
+    "next": "다음",
+    "page": "{{current}} / {{total}} 페이지"
+  },
+  "loading": {
+    "posts": "게시글을 불러오는 중...",
+    "search": "검색 중...",
+    "general": "로딩 중..."
+  }
+}
