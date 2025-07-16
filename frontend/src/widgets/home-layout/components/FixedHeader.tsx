@@ -17,9 +17,9 @@ export function FixedHeader({
   searchQuery
 }: FixedHeaderProps) {
   return (
-    <div className="bg-primary/95 backdrop-blur-sm z-10 pb-4 mb-2 flex-shrink-0">
+    <div className="bg-primary/95 backdrop-blur-sm z-10 pb-6 mb-6 flex-shrink-0">
       {/* Search Bar */}
-      <div className="mb-4">
+      <div className="mb-6">
         <SearchBar 
           onSearch={onSearch}
           initialValue={searchQuery}
@@ -27,7 +27,7 @@ export function FixedHeader({
       </div>
 
       {/* Fixed Tags - Mobile Horizontal (xs only) */}
-      <div className="md:hidden">
+      <div className="md:hidden xs: mt-6">
         <FixedTags 
           onTagClick={onTagClick}
           selectedTags={selectedTags}
