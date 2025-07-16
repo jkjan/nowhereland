@@ -6,23 +6,28 @@ export class DatabaseService {
   constructor() {
     this.supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
   }
 
   async getSiteSetting(key: string): Promise<string | null> {
-    const { data, error } = await this.supabase
-      .from('site_setting')
-      .select('value')
-      .eq('key', key)
-      .single();
+    try {
+      const { data, error } = await this.supabase
+        .from('site_setting')
+        .select('value')
+        .eq('key', key)
+        .single();
 
-    if (error) {
-      console.error(`Error getting site setting ${key}:`, error);
+      if (error) {
+        // Return null to use defaults if error occurs
+        return null;
+      }
+
+      return data?.value || null;
+    } catch (error) {
+      // Return null to use defaults if error occurs
       return null;
     }
-
-    return data?.value || null;
   }
 
   async trackSearchHistory(historyEntry: {
