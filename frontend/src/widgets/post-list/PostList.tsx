@@ -7,6 +7,7 @@ import { useInfiniteScroll } from '@/shared/hooks';
 import { PostItem } from '../post-item';
 import { Post } from '@/entities/post';
 import { PostListErrorFallback } from '@/shared/ui/error-fallback';
+import { PostSkeleton } from '../post-skeleton';
 
 interface PostListProps {
   posts?: Post[];
@@ -16,31 +17,6 @@ interface PostListProps {
   error?: string | null;
   onLoadMore?: () => void;
   onRetry?: () => void;
-}
-
-function PostSkeleton() {
-  return (
-    <Card className="p-4 mb-4 shadow-md border-0 bg-white text-black">
-      <div className="flex gap-4">
-        {/* Thumbnail skeleton */}
-        <div className="flex-shrink-0">
-          <Skeleton className="w-24 h-24 lg:w-32 lg:h-32 rounded-md" />
-        </div>
-        
-        {/* Content skeleton */}
-        <div className="flex-1 space-y-2">
-          <Skeleton className="h-6 w-3/4" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-2/3" />
-          <div className="flex gap-2 mt-2">
-            <Skeleton className="h-6 w-16 rounded-full" />
-            <Skeleton className="h-6 w-20 rounded-full" />
-            <Skeleton className="h-6 w-14 rounded-full" />
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
 }
 
 export default function PostList({ 
@@ -86,38 +62,31 @@ export default function PostList({
 
   return (
     <div>
-      {/* Posts */}
+      {/* Posts and loading skeletons in one continuous list */}
       <div>
         {posts.map((post) => (
           <PostItem key={post.id} post={post} />
         ))}
+        
+        {/* Loading more skeletons - no gap */}
+        {loadingMore && (
+          <>
+            {Array.from({ length: 2 }).map((_, index) => (
+              <PostSkeleton key={`loading-${index}`} />
+            ))}
+          </>
+        )}
       </div>
 
       {/* Infinite scroll trigger */}
       {hasMore && (
-        <div ref={loadMoreRef} className="flex justify-center mt-8 py-4">
-          {loadingMore && (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-              <span className="text-muted-foreground">{t('loading.posts')}</span>
-            </div>
-          )}
-        </div>
+        <div ref={loadMoreRef} className="mt-8 py-4" />
       )}
 
       {/* No more posts message */}
       {!hasMore && posts.length > 0 && (
         <div className="text-center py-8 mt-8">
           <p className="text-muted-foreground text-sm">{t('posts.noMorePosts')}</p>
-        </div>
-      )}
-
-      {/* Loading more skeletons */}
-      {loadingMore && (
-        <div className="mt-4">
-          {Array.from({ length: 2 }).map((_, index) => (
-            <PostSkeleton key={`loading-${index}`} />
-          ))}
         </div>
       )}
     </div>
