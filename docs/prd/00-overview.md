@@ -60,9 +60,16 @@ graph TB
 - **Business Rules**: Content lifecycle, publishing rules, tagging policies
 
 #### 2. **User Domain** (`user`)
-- **Responsibility**: User management, authentication, and authorization
-- **Key Entities**: User, Role, Session
-- **Business Rules**: Admin-only access, secure authentication
+- **Responsibility**: Single admin user management, authentication, and authorization
+- **Key Entities**: User, Role, Session, EmailVerification
+- **Business Rules**: 
+  - **Single Admin Model**: Only one admin user allowed in the system
+  - **Registration Logic**: 
+    - If no admin exists: Allow registration at `/admin/register` (hidden route) with email verification
+    - If admin exists: Block all registration attempts with message "This blog already has an owner"
+    - Email verification required for security (send to blog owner's email)
+  - **Secure Authentication**: JWT tokens, PBKDF2 password hashing
+  - **No Public Registration**: Registration route hidden from UI, accessible only via direct URL
 
 #### 3. **Media Domain** (`media`, mostly image but for extension) 
 - **Responsibility**: Image and file management, processing, and delivery
@@ -97,11 +104,17 @@ graph TB
 - Reference system
 - Content organization
 
-### 2. **User Experience** (UC-UM-xxx)
-- Authentication and session management
+### 2. **User Experience** (UC-UX-xxx)
 - Content consumption and navigation
 - Search and discovery
 - Responsive interactions
+- Language switching (Korean/English)
+- Theme switching (light/dark mode)
+
+### 2.1. **User Management** (UC-UM-xxx)
+- Single admin authentication and session management
+- Email verification workflow
+- Registration blocking when admin exists
 
 ### 3. **Media Operations** (UC-MM-xxx)
 - Image upload and processing
@@ -129,16 +142,68 @@ graph TB
 ## 🔐 Security Framework
 
 ### Authorization Levels
-1. **Anonymous** - Public content access
-2. **Authenticated User** - Comment functionality
-3. **Admin** - Full system access
-4. **System** - Internal service operations
+1. **Anonymous** - Public content access, comment functionality
+2. **Admin** - Full system access (single user only)
+3. **System** - Internal service operations
+
+### Registration & Authentication Flow
+1. **Check Admin Existence**: System checks if `is_admin = true` user exists
+2. **If No Admin**: 
+   - Allow access to `/admin/register` (hidden route)
+   - Require email verification before account activation
+   - Send verification email to provided address
+   - Mark first user as `is_admin = true`
+3. **If Admin Exists**: 
+   - Block registration with message: "This blog already has an owner"
+   - Hide registration UI completely
+   - Return 403 for `/admin/register` route
 
 ### Security Policies
 - **Policy-Based Authorization**: Each use case defines specific authorization requirements
 - **Row-Level Security (RLS)**: Database-level access control
 - **API Security**: Rate limiting, CORS, input validation
 - **Data Protection**: GDPR/CCPA compliance, privacy controls
+
+## 🌐 Internationalization Framework
+
+### Supported Languages
+1. **Korean (한국어)** - Default language
+2. **English** - Secondary language
+
+### Language Management
+- **Default Locale**: Korean (`ko`)
+- **Fallback Locale**: English (`en`)
+- **Storage**: Browser localStorage for user preference
+- **Detection**: Browser language with Korean as fallback
+
+### Language Switching
+- **UI Location**: Header component (globe icon)
+- **Behavior**: 
+  - Click globe icon to toggle between Korean/English
+  - Immediate language change without page reload
+  - Preference saved in localStorage
+  - URL structure: `/{locale}/...` (optional, can be query param)
+
+### Text Organization
+```
+locales/
+├── ko/                    # Korean (default)
+│   ├── common.json        # Common UI elements
+│   ├── pages.json         # Page-specific content
+│   ├── auth.json          # Authentication messages
+│   └── errors.json        # Error messages
+└── en/                    # English
+    ├── common.json
+    ├── pages.json
+    ├── auth.json
+    └── errors.json
+```
+
+### Implementation Requirements
+- **Library**: next-i18next or Next.js native i18n
+- **SSR Support**: Server-side language detection
+- **SEO**: Proper hreflang tags for bilingual content
+- **Fallback**: Always fallback to Korean if translation missing
 
 ## 📊 Success Metrics
 
