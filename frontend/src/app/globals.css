@@ -43,6 +43,15 @@
   --input: 0 0 100;
   --ring: 0 84 56;
   --radius: 6px;
+
+  .text-destructive {
+    --tw-text-opacity: 1;
+    color: hsl(var(--destructive) / var(--tw-text-opacity));
+  }
+  .text-destructive-foreground {
+    --tw-text-opacity: 1;
+    color: hsl(var(--destructive-foreground) / var(--tw-text-opacity));
+  }  
 }
 
 /* Dark theme */

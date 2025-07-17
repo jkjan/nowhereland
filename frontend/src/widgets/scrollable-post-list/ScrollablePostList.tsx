@@ -1,7 +1,7 @@
 'use client';
 
 import { PostList } from '@/widgets/post-list';
-import { Post } from '@/entities/post';
+import { Post } from '@/entities/post/model';
 import { useState } from 'react';
 
 interface ScrollablePostListProps {

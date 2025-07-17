@@ -1,4 +1,7 @@
 {
+  "common": {
+    "next": "Next"
+  },
   "navigation": {
     "home": "Home",
     "aboutMe": "About Me",
@@ -51,5 +54,13 @@
     "unableToLoadPosts": "Unable to load posts. Please try again.",
     "tryAgain": "Try again",
     "retry": "Retry"
+  },
+  "user": {
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "wrongEmail": "Please check email format.",
+    "wrongUsername": "Username should be 2-50 characters.",
+    "wrongPassword": "Password must be 8-64 characters."
   }
 }
