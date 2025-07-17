@@ -1,8 +1,6 @@
 'use client';
 
 import { useTranslation } from '@/lib/i18n';
-import { Skeleton } from '@/shared/ui/skeleton';
-import { Card } from '@/shared/ui/card';
 import { useInfiniteScroll } from '@/shared/hooks';
 import { PostItem } from '../post-item';
 import { Post } from '@/entities/post';
@@ -61,7 +59,7 @@ export default function PostList({
   }
 
   return (
-    <div>
+    <div className="my-1 mx-0.5">
       {/* Posts and loading skeletons in one continuous list */}
       <div>
         {posts.map((post) => (
