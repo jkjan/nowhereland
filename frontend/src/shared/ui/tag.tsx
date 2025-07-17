@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "./button";
 
 export default function Tag({tag, selected = false, onClick} :{tag: string,  selected?: boolean, onClick?: (tag: string) => void,}) {

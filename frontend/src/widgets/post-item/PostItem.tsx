@@ -1,5 +1,5 @@
-import { Post } from "@/entities/post/model/types";
-import { useTranslation } from "@/lib/i18n";
+import { Post } from "@/entities/post/types";
+import { useTranslation } from "@/shared/lib/i18n";
 import { Card } from "@/shared/ui/card";
 import Tag from "@/shared/ui/tag";
 import Link from "next/link";

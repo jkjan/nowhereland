@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation } from '@/shared/lib/i18n';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Search, X } from 'lucide-react';

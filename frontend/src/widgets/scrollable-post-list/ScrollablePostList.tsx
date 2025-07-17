@@ -14,7 +14,7 @@ interface ScrollablePostListProps {
   onRetry: () => void;
 }
 
-export function ScrollablePostList({
+export default function ScrollablePostList({
   posts,
   loading,
   loadingMore,
