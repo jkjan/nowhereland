@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslation } from '@/lib/i18n';
-import { useTheme } from '@/lib/theme';
+import { useTranslation } from '@/shared/lib/i18n';
+import { useTheme } from '@/shared/lib/theme';
 import SunIcon from '@/shared/ui/sunicon';
 import MoonIcon from '@/shared/ui/moonicon';
 

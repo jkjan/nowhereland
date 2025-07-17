@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation } from '@/shared/lib/i18n';
 import { useInfiniteScroll } from '@/shared/hooks';
 import { PostItem } from '../post-item';
 import { Post } from '@/entities/post';

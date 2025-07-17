@@ -1,36 +1,25 @@
 'use client';
 
 import { FixedTags } from '@/widgets/fixed-tags';
-import { Post } from '@/entities/post';
-import { FixedHeader, ScrollablePostList } from './components';
+import { FixedHeader } from '../../widgets/fixed-header';
+import { useHomePageState } from '@/features/home';
+import { ScrollablePostList } from '@/widgets/scrollable-post-list';
 
-interface HomeLayoutProps {
-  posts: Post[];
-  loading: boolean;
-  loadingMore: boolean;
-  hasMore: boolean;
-  error: string | null;
-  onLoadMore: () => void;
-  onSearch: (query: string) => void;
-  onTagClick: (tag: string) => void;
-  onRetry: () => void;
-  selectedTags: string[];
-  searchQuery: string;
-}
+export default function HomeLayout() {
+    const {
+      searchQuery,
+      selectedTags,
+      posts,
+      loading,
+      loadingMore,
+      hasMore,
+      error,
+      resetError,
+      handleSearch,
+      handleTagClick,
+      handleLoadMore,
+    } = useHomePageState();
 
-export default function HomeLayout({
-  posts,
-  loading,
-  loadingMore,
-  hasMore,
-  error,
-  onLoadMore,
-  onSearch,
-  onTagClick,
-  onRetry,
-  selectedTags,
-  searchQuery
-}: HomeLayoutProps) {
   return (
     <div 
       className="h-full max-w-7xl mx-auto"
@@ -53,7 +42,7 @@ export default function HomeLayout({
             }}
           >
             <FixedTags 
-              onTagClick={onTagClick}
+              onTagClick={handleTagClick}
               selectedTags={selectedTags}
             />
           </div>
@@ -63,8 +52,8 @@ export default function HomeLayout({
         <div className="col-span-4 md:col-span-7 lg:col-span-9 h-full flex flex-col">
           {/* Fixed Header Area - Search Bar + Tags */}
           <FixedHeader
-            onSearch={onSearch}
-            onTagClick={onTagClick}
+            onSearch={handleSearch}
+            onTagClick={handleTagClick}
             selectedTags={selectedTags}
             searchQuery={searchQuery}
           />
@@ -76,8 +65,8 @@ export default function HomeLayout({
             loadingMore={loadingMore}
             hasMore={hasMore}
             error={error}
-            onLoadMore={onLoadMore}
-            onRetry={onRetry}
+            onLoadMore={handleLoadMore}
+            onRetry={resetError}
           />
         </div>
 

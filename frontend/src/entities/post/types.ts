@@ -7,11 +7,3 @@ export interface Post {
   view_count: number;
   tags: string[];
 }
-
-export interface PostListState {
-  posts: Post[];
-  loading: boolean;
-  loadingMore: boolean;
-  hasMore: boolean;
-  cursor: string | null;
-}

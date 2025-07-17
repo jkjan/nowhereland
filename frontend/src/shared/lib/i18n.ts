@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-import koCommon from '@/locales/ko/common.json';
-import enCommon from '@/locales/en/common.json';
+import koCommon from '../locales/ko/common.json';
+import enCommon from '../locales/en/common.json';
 
 export type Language = 'ko' | 'en';
 
