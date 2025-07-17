@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Post } from '@/entities/post';
+import { Post } from '@/entities/post/model';
 
 import { mockPosts, generateMorePosts } from '@/shared/mock/post.mock';
 

@@ -1,4 +1,4 @@
-import { Post } from '@/entities/post';
+import { Post } from '@/entities/post/model';
 
 export const mockPosts: Post[] = Array.from({ length: 10 }, (_, i) => ({
   id: `${i + 1}`,

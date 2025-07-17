@@ -25,9 +25,21 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body className="antialiased h-screen overflow-hidden">
         <Header />
-        <main className="h-[calc(100vh-64px)]">
-          {children}
-        </main>
+          <main
+            className="max-w-7xl mx-auto"
+            style={{
+              padding: `var(--spacing-margin)`
+            }}
+          >
+            <div
+              className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12"
+              style={{
+                gap: `var(--spacing-gutter)`
+              }}
+            >
+              {children}
+            </div>
+          </main>
       </body>
     </html>
   );

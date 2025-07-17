@@ -3,7 +3,7 @@
 import { useTranslation } from '@/shared/lib/i18n';
 import { useInfiniteScroll } from '@/shared/hooks';
 import { PostItem } from '../post-item';
-import { Post } from '@/entities/post';
+import { Post } from '@/entities/post/model';
 import { PostListErrorFallback } from '@/shared/ui/error-fallback';
 import { PostSkeleton } from '../post-skeleton';
 

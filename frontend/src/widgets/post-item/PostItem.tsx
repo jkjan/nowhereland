@@ -1,4 +1,4 @@
-import { Post } from "@/entities/post/types";
+import { Post } from "@/entities/post/model/types";
 import { useTranslation } from "@/shared/lib/i18n";
 import { Card } from "@/shared/ui/card";
 import Tag from "@/shared/ui/tag";

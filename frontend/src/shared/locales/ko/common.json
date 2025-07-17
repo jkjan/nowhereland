@@ -1,4 +1,7 @@
 {
+  "common": {
+    "next": "다음"
+  },
   "navigation": {
     "home": "홈",
     "aboutMe": "소개",
@@ -51,5 +54,13 @@
     "unableToLoadPosts": "게시글을 불러올 수 없습니다. 다시 시도해주세요.",
     "tryAgain": "다시 시도",
     "retry": "재시도"
+  },
+  "user": {
+    "email": "이메일",
+    "username": "사용자 이름",
+    "password": "비밀번호",
+    "wrongEmail": "이메일 형식을 확인해주세요.",
+    "wrongUsername": "사용자 이름은 2-50자여야 합니다.",
+    "wrongPassword": "비밀번호는 8-64자여야 합니다."
   }
 }
