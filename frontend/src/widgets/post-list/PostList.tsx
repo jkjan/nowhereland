@@ -53,7 +53,7 @@ export default function PostList({
   if (posts.length === 0 && !loading) {
     return (
       <div className="text-center py-12">
-        <p className="text-neutral text-lg">{t('search.noResults')}</p>
+        <p className="text-foreground text-lg">{t('search.noResults')}</p>
       </div>
     );
   }
