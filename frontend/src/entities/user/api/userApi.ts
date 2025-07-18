@@ -2,16 +2,15 @@ import { createClient } from "@/shared/lib/supabase/client";
 import { SignUpDTO, SignInDTO } from "../model";
 
 export async function getAdminExists() {
-    // TODO: api call for user table, if is_admin=true exists
     const supabase = createClient();
-    const adminExists = await supabase.functions.invoke("admin-exists",
-        {
-            method: "GET"
-        })
-
-    if (adminExists.error) throw Error;
-
-    return adminExists.data.adminExists;
+    const { data, error } = await supabase.rpc('check_admin_exists');
+    
+    if (error) {
+        console.error('Error checking admin exists:', error);
+        throw new Error('Failed to check admin existence');
+    }
+    
+    return data === true;
 }
 
 export async function signUp(signUpDto: SignUpDTO) {

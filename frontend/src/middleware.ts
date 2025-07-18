@@ -33,18 +33,14 @@ export async function middleware(request: NextRequest) {
   // Check if admin exists in the system (only when no JWT)
   const checkAdminExists = async (): Promise<boolean> => {
     try {
-      const { data, error } = await supabase
-        .from('user')
-        .select('id')
-        .eq('is_admin', true)
-        .limit(1);
+      const { data, error } = await supabase.rpc('check_admin_exists');
       
       if (error) {
         console.error('Error checking admin exists:', error);
         return false;
       }
       
-      return data && data.length > 0;
+      return data === true;
     } catch (error) {
       console.error('Error in checkAdminExists:', error);
       return false;
