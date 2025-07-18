@@ -18,7 +18,7 @@ export default function PendingPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="col-span-4 md:col-start-3 lg:col-start-5 flex items-center justify-center bg-background">
       <div className="w-full max-w-md space-y-6">
         <Card>
           <CardHeader className="text-center">
