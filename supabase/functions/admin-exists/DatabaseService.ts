@@ -10,9 +10,15 @@ export class DatabaseService {
     }
 
     async checkAdminExists(): Promise<boolean> {
-        const adminUser = await this.supabase.from("user").select().eq("is_admin", true);
-        const adminCount = adminUser.data.length
-        console.log(adminUser);
+        const { data, error } = await this.supabase.from("user").select().eq("is_admin", true);
+        
+        if (error) {
+            console.error('Error checking admin exists:', error);
+            throw error;
+        }
+        
+        const adminCount = data?.length || 0;
+        console.log('Admin check result:', { adminCount, data });
 
         return adminCount > 0;
     }
