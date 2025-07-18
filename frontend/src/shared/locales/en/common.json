@@ -1,6 +1,8 @@
 {
   "common": {
-    "next": "Next"
+    "next": "Next",
+    "signIn": "Sign In",
+    "signUp": "Sign Up"
   },
   "navigation": {
     "home": "Home",
@@ -58,10 +60,17 @@
   "user": {
     "email": "Email",
     "username": "Username",
+    "displayName": "Display Name",
     "password": "Password",
     "wrongEmail": "Please check email format.",
-    "wrongUsername": "Username should be 2-50 characters.",
+    "wrongUsername": "Username should be 3-30 characters.",
+    "wrongDisplayName": "Display name should be 1-50 characters.",
     "wrongPassword": "Password must be 8-64 characters.",
-    "waitForApprove": "Register request accepted. Please wait for approval."
+    "passwordRequired": "Please enter your password.",
+    "waitForApproval": "Registration completed. Please wait for approval.",
+    "signupSuccess": "Signup Completed!",
+    "redirectIn": "Redirecting to main page in {{seconds}} seconds",
+    "signInSuccess": "Successfully signed in.",
+    "signInError": "Sign in failed."
   }
 }

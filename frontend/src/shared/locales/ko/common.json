@@ -1,6 +1,8 @@
 {
   "common": {
-    "next": "다음"
+    "next": "다음",
+    "signIn": "로그인",
+    "signUp": "회원가입"
   },
   "navigation": {
     "home": "홈",
@@ -58,10 +60,17 @@
   "user": {
     "email": "이메일",
     "username": "사용자 이름",
+    "displayName": "표시 이름",
     "password": "비밀번호",
     "wrongEmail": "이메일 형식을 확인해주세요.",
-    "wrongUsername": "사용자 이름은 2-50자여야 합니다.",
+    "wrongUsername": "사용자 이름은 3-30자여야 합니다.",
+    "wrongDisplayName": "표시 이름은 1-50자여야 합니다.",
     "wrongPassword": "비밀번호는 8-64자여야 합니다.",
-    "waitForApprove": "회원 등록이 완료됐습니다. 승인을 기다려주세요."
+    "passwordRequired": "비밀번호를 입력해주세요.",
+    "waitForApproval": "회원 등록이 완료됐습니다. 승인을 기다려주세요.",
+    "signupSuccess": "회원가입 완료!",
+    "redirectIn": "{{seconds}}초 후 메인 페이지로 이동합니다",
+    "signInSuccess": "로그인이 완료되었습니다.",
+    "signInError": "로그인에 실패했습니다."
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import useSignUpForm from "@/features/user/signup/useSignUpForm";
+import useSignInForm from "@/features/user/signin/useSignInForm";
 import { useTranslation } from "@/shared/lib/i18n";
 import SubmitButton from "@/shared/ui/submit-button";
 import { Card } from "@/shared/ui/card";
@@ -15,9 +15,9 @@ import {
 } from "@/shared/ui/form"
 import { Input } from "@/shared/ui/input"
 
-export default function SignUpLayout() {
+export default function SignInLayout() {
     const { t } = useTranslation();
-    const { isLoading, form, onSubmit } = useSignUpForm();
+    const { isLoading, form, onSubmit } = useSignInForm();
 
     return (
         <>
@@ -39,19 +39,6 @@ export default function SignUpLayout() {
                         />
                         <FormField
                             control={form.control}
-                            name="displayName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("user.displayName")}</FormLabel>
-                                    <FormControl>
-                                        <Input type="text" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
@@ -66,7 +53,7 @@ export default function SignUpLayout() {
                         <div className="flex justify-end">
                             <SubmitButton
                                 isLoading={isLoading}
-                                text={t("common.next")}
+                                text={t("common.signIn")}
                             />
                         </div>
                     </form>

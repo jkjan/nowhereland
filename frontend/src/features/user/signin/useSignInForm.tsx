@@ -3,41 +3,40 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import SignUpSchema from "./SignUpSchema"
-import { signUp } from "@/entities/user/api/userApi"
+import SignInSchema from "./SignInSchema"
+import { signIn } from "@/entities/user/api/userApi"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { useTranslation } from "@/shared/lib/i18n"
 
-export default function useSignUpForm() {
+export default function useSignInForm() {
+  const { t } = useTranslation();
   const [ isLoading, setIsLoading ] = useState<boolean>(false);
   const router = useRouter();
 
-  // 1. Define your form.
-  const formSchema = SignUpSchema();
+  const formSchema = SignInSchema();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      password: "",
-      displayName: ""
+      password: ""
     },
   })
 
-  // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     setIsLoading(true);
 
-    signUp({
+    signIn({
       email: values.email,
-      password: values.password,
-      displayName: values.displayName
+      password: values.password
     }).then(() => {
-      router.push("/admin/signup/pending");
+      router.push("/admin");
+      toast(t("user.signInSuccess"));
     }).catch((err) => {
-      console.log(err);
+      console.error(err);
+      toast.error(err.message || t("user.signInError"));
     }).finally(() => {
       setIsLoading(false);
     })

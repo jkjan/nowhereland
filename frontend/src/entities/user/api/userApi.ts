@@ -1,5 +1,5 @@
 import { createClient } from "@/shared/lib/supabase/client";
-import { SignUpDTO } from "../model";
+import { SignUpDTO, SignInDTO } from "../model";
 
 export async function getAdminExists() {
     // TODO: api call for user table, if is_admin=true exists
@@ -15,18 +15,59 @@ export async function getAdminExists() {
 }
 
 export async function signUp(signUpDto: SignUpDTO) {
-    const { email, password } = signUpDto;
-
-    console.log("asdf");
+    const { email, password, displayName } = signUpDto;
 
     const supabase = createClient();
+
+    // Check if admin already exists - only allow signup if no admin exists
+    const adminExists = await getAdminExists();
+    if (adminExists) {
+        throw new Error("This blog already has an owner");
+    }
 
     const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+            data: {
+                display_name: displayName
+            }
+        }
     });
 
-    // set cookie and redirect to pending page. user should be approved by admin. 
+    if (error) throw error;
+}
+
+export async function signIn(signInDto: SignInDTO) {
+    const { email, password } = signInDto;
+
+    const supabase = createClient();
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+    });
 
     if (error) throw error;
+
+    // Check if user is admin and active
+    if (data.user) {
+        const { data: userData, error: userError } = await supabase
+            .from('user')
+            .select('is_admin, is_active')
+            .eq('auth_user_id', data.user.id)
+            .single();
+
+        if (userError) throw userError;
+
+        if (!userData?.is_admin) {
+            throw new Error("Access denied: Admin access required");
+        }
+
+        if (!userData?.is_active) {
+            throw new Error("Account is not active");
+        }
+    }
+
+    return data;
 }
