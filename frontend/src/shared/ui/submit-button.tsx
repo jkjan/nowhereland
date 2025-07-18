@@ -3,7 +3,7 @@ import { Button } from "./button";
 export default function SubmitButton({ text, isLoading }: { text: string, isLoading: boolean }) {
     return (
         <Button
-            className="items-end bg-[var(--color-accent)] text-[var(--color-primary)]"
+            className="items-end"
             type="submit"
         >
             {text}

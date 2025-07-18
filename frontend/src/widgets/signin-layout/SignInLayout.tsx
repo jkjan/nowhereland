@@ -21,11 +21,11 @@ export default function SignInLayout() {
 
     return (
         <>
-            <Card className="col-span-4 md:col-start-3 lg:col-start-5 p-4 mb-4 shadow-md hover:shadow-lg border-0 bg-white text-black">
+            <Card className="col-span-4 md:col-start-3 lg:col-start-5 p-4 mb-4 shadow-md hover:shadow-lg border-0">
             <div className="space-y-6">
                     {/* Header */}
                     <div className="text-center">
-                        <h1 className="text-2xl font-bold text-black mb-2">
+                        <h1 className="text-2xl font-bold mb-2">
                             {t("admin.signin")}
                         </h1>
                     </div>

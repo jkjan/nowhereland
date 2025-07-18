@@ -18,7 +18,7 @@ export function FixedHeader({
 }: FixedHeaderProps) {
   return (
     <div 
-      className="bg-primary/95 backdrop-blur-sm z-10 flex-shrink-0"
+      className="backdrop-blur-sm z-10 flex-shrink-0"
       style={{ 
         paddingBottom: `var(--spacing-component)`,
       }}

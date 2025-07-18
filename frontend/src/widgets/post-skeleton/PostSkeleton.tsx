@@ -4,7 +4,7 @@ import { Skeleton } from "@/shared/ui/skeleton";
 export default function PostSkeleton() {
   return (
     <div className="block group">
-      <Card className="p-4 mb-4 shadow-md border-0 bg-white text-black">
+      <Card className="p-4 mb-4 shadow-md border-0">
         <div className="flex gap-4">
           {/* Thumbnail skeleton */}
           <div className="flex-shrink-0">

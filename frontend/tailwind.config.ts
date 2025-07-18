@@ -10,19 +10,19 @@ const config: Config = {
     extend: {
       colors: {
         // Original theme colors
-        'primary': 'var(--color-primary)',
-        'secondary': 'var(--color-secondary)',
-        'accent': 'var(--color-accent)',
-        'neutral': 'var(--color-neutral)',
+        'primary': 'var(--primary)',
+        'secondary': 'var(--secondary)',
+        'accent': 'var(--accent)',
+        'neutral': 'var(--neutral)',
         
         // Extended color palette
-        'surface': 'var(--color-surface)',
-        'surface-variant': 'var(--color-surface-variant)',
-        'surface-dim': 'var(--color-surface-dim)',
-        'on-surface': 'var(--color-on-surface)',
-        'on-surface-variant': 'var(--color-on-surface-variant)',
-        'outline': 'var(--color-outline)',
-        'outline-variant': 'var(--color-outline-variant)',
+        'surface': 'var(--surface)',
+        'surface-variant': 'var(--surface-variant)',
+        'surface-dim': 'var(--surface-dim)',
+        'on-surface': 'var(--on-surface)',
+        'on-surface-variant': 'var(--on-surface-variant)',
+        'outline': 'var(--outline)',
+        'outline-variant': 'var(--outline-variant)',
         
         // shadcn color system
         background: "hsl(var(--background))",
