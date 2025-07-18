@@ -72,5 +72,18 @@
     "redirectIn": "{{seconds}}초 후 메인 페이지로 이동합니다",
     "signInSuccess": "로그인이 완료되었습니다.",
     "signInError": "로그인에 실패했습니다."
+  },
+  "admin": {
+    "title": "관리자 페이지",
+    "subtitle": "블로그 관리 도구",
+    "writePost": "글 쓰기",
+    "writePostDesc": "새 블로그 포스트 작성",
+    "settings": "설정",
+    "settingsDesc": "사이트 설정 및 개인정보 관리",
+    "dashboard": "대시보드",
+    "dashboardDesc": "통계 및 분석 보기",
+    "logout": "로그아웃",
+    "logoutSuccess": "로그아웃이 완료되었습니다.",
+    "logoutError": "로그아웃 중 오류가 발생했습니다."
   }
 }
