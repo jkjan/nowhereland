@@ -61,6 +61,7 @@
     "password": "Password",
     "wrongEmail": "Please check email format.",
     "wrongUsername": "Username should be 2-50 characters.",
-    "wrongPassword": "Password must be 8-64 characters."
+    "wrongPassword": "Password must be 8-64 characters.",
+    "waitForApprove": "Register request accepted. Please wait for approval."
   }
 }

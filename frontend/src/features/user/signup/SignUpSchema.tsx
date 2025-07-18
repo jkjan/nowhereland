@@ -8,7 +8,6 @@ export default function SignUpSchema() {
 
     return z.object({
         email: z.email(t("user.wrongEmail")),
-        username: z.string().min(2, t("user.wrongUsername")).max(50),
         password: z.string().min(8, t("user.wrongPassword")).max(64),
     })
 }

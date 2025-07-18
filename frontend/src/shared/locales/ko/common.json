@@ -61,6 +61,7 @@
     "password": "비밀번호",
     "wrongEmail": "이메일 형식을 확인해주세요.",
     "wrongUsername": "사용자 이름은 2-50자여야 합니다.",
-    "wrongPassword": "비밀번호는 8-64자여야 합니다."
+    "wrongPassword": "비밀번호는 8-64자여야 합니다.",
+    "waitForApprove": "회원 등록이 완료됐습니다. 승인을 기다려주세요."
   }
 }
