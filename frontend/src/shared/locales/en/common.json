@@ -83,7 +83,17 @@
     "dashboard": "Dashboard",
     "dashboardDesc": "View statistics and analytics",
     "logout": "Logout",
+    "signin": "Sign In",
+    "signup": "Sign Up",
     "logoutSuccess": "Successfully logged out.",
-    "logoutError": "Error occurred during logout."
+    "logoutError": "Error occurred during logout.",
+    "pending": {
+      "title": "Account Pending",
+      "subtitle": "Your account is waiting for approval",
+      "accountCreated": "Account Created Successfully",
+      "waitingForApproval": "Your account is waiting for admin approval",
+      "explanation": "Your account has been created but requires admin approval before you can access the admin panel.",
+      "contactInfo": "Please contact the site administrator to activate your account."
+    }
   }
 }

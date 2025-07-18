@@ -46,7 +46,7 @@ export default function AdminLayout() {
     ];
 
     return (
-            <Card className="col-span-4 md:col-start-3 lg:col-start-5 p-8 shadow-md border-0 bg-white text-black max-w-md w-full">
+        <Card className="col-span-4 md:col-start-3 lg:col-start-5 p-4 mb-4 shadow-md hover:shadow-lg border-0 bg-white text-black">
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="text-center">
