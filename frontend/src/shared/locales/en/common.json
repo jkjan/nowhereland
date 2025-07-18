@@ -72,5 +72,18 @@
     "redirectIn": "Redirecting to main page in {{seconds}} seconds",
     "signInSuccess": "Successfully signed in.",
     "signInError": "Sign in failed."
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "subtitle": "Blog management tools",
+    "writePost": "Write Post",
+    "writePostDesc": "Create a new blog post",
+    "settings": "Settings",
+    "settingsDesc": "Site settings and profile management",
+    "dashboard": "Dashboard",
+    "dashboardDesc": "View statistics and analytics",
+    "logout": "Logout",
+    "logoutSuccess": "Successfully logged out.",
+    "logoutError": "Error occurred during logout."
   }
 }

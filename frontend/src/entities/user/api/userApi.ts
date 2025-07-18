@@ -50,22 +50,18 @@ export async function signIn(signInDto: SignInDTO) {
 
     if (error) throw error;
 
-    // Check if user is admin and active
+    // Check if user is admin
     if (data.user) {
         const { data: userData, error: userError } = await supabase
             .from('user')
-            .select('is_admin, is_active')
+            .select('is_admin')
             .eq('auth_user_id', data.user.id)
             .single();
 
         if (userError) throw userError;
 
         if (!userData?.is_admin) {
-            throw new Error("Access denied: Admin access required");
-        }
-
-        if (!userData?.is_active) {
-            throw new Error("Account is not active");
+            throw new Error("Access denied: Only admin can login");
         }
     }
 
