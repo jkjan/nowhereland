@@ -50,17 +50,12 @@ export async function signIn(signInDto: SignInDTO) {
 
     if (error) throw error;
 
-    // Check if user is admin
+    // Check if user is admin using JWT metadata (no DB query needed)
     if (data.user) {
-        const { data: userData, error: userError } = await supabase
-            .from('user')
-            .select('is_admin')
-            .eq('auth_user_id', data.user.id)
-            .single();
+        const userMetadata = data.user.app_metadata || {};
+        const isAdmin = userMetadata.is_admin === true;
 
-        if (userError) throw userError;
-
-        if (!userData?.is_admin) {
+        if (!isAdmin) {
             throw new Error("Access denied: Only admin can login");
         }
     }

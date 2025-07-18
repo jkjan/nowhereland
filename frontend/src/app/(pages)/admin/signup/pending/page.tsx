@@ -1,55 +1,63 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslation } from "@/shared/lib/i18n";
-import { Card } from "@/shared/ui/card";
+import { useTranslation } from '@/shared/lib/i18n';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Button } from '@/shared/ui/button';
+import { CheckCircle, Clock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/shared/lib/supabase/client';
 
-export default function SignupPendingPage() {
-    const { t } = useTranslation();
-    const router = useRouter();
-    const [countdown, setCountdown] = useState(5);
+export default function PendingPage() {
+  const { t } = useTranslation();
+  const router = useRouter();
 
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCountdown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    router.push("/");
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
-        return () => clearInterval(timer);
-    }, [router]);
-
-    return (
-            <Card className="col-span-4 md:col-start-3 lg:col-start-5 p-8 text-center shadow-md border-0 bg-white text-black max-w-md w-full">
-                <div className="space-y-6">
-                    <div className="text-6xl mb-4">✅</div>
-                    
-                    <h1 className="text-2xl font-bold text-green-600 mb-4">
-                        {t("user.signupSuccess")}
-                    </h1>
-                    
-                    <p className="text-gray-600 mb-6">
-                        {t("user.waitForApproval")}
-                    </p>
-                    
-                    <div className="bg-gray-100 rounded-lg p-4">
-                        <p className="text-sm text-gray-500">
-                            {t("user.redirectIn", { seconds: countdown })}
-                        </p>
-                        
-                        <div className="mt-2">
-                            <div className="bg-blue-500 h-2 rounded-full transition-all duration-1000 ease-linear" 
-                                 style={{ width: `${(countdown / 5) * 100}%` }}>
-                            </div>
-                        </div>
-                    </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-md space-y-6">
+        <Card>
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
+              <Clock className="h-6 w-6 text-yellow-600" />
+            </div>
+            <CardTitle className="text-2xl">{t('admin.pending.title')}</CardTitle>
+            <CardDescription>
+              {t('admin.pending.subtitle')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg bg-yellow-50 p-4">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <div className="text-sm text-yellow-700">
+                  <p className="font-medium">{t('admin.pending.accountCreated')}</p>
+                  <p>{t('admin.pending.waitingForApproval')}</p>
                 </div>
-            </Card>
-    );
+              </div>
+            </div>
+            
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p>{t('admin.pending.explanation')}</p>
+              <p>{t('admin.pending.contactInfo')}</p>
+            </div>
+
+            <div className="pt-4">
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleLogout}
+              >
+                {t('admin.logout')}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 }

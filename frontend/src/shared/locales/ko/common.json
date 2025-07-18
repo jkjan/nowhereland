@@ -82,8 +82,18 @@
     "settingsDesc": "사이트 설정 및 개인정보 관리",
     "dashboard": "대시보드",
     "dashboardDesc": "통계 및 분석 보기",
+    "signin": "로그인",
+    "signup": "회원가입",
     "logout": "로그아웃",
     "logoutSuccess": "로그아웃이 완료되었습니다.",
-    "logoutError": "로그아웃 중 오류가 발생했습니다."
+    "logoutError": "로그아웃 중 오류가 발생했습니다.",
+    "pending": {
+      "title": "계정 승인 대기중",
+      "subtitle": "계정이 승인을 기다리고 있습니다",
+      "accountCreated": "계정이 성공적으로 생성되었습니다",
+      "waitingForApproval": "관리자 승인을 기다리고 있습니다",
+      "explanation": "계정이 생성되었지만 관리자 패널 접근을 위해서는 관리자 승인이 필요합니다.",
+      "contactInfo": "계정을 활성화하려면 사이트 관리자에게 문의하세요."
+    }
   }
 }
