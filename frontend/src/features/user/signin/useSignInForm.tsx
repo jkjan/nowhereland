@@ -35,7 +35,8 @@ export default function useSignInForm() {
       router.push("/admin");
       toast(t("user.signInSuccess"));
     }).catch((err) => {
-      console.error(err);
+      // Log error for debugging without exposing sensitive data
+      console.error('Sign in error:', err.name || 'Unknown error');
       toast.error(err.message || t("user.signInError"));
     }).finally(() => {
       setIsLoading(false);

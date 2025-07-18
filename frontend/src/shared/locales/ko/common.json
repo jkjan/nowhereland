@@ -67,6 +67,7 @@
     "wrongDisplayName": "표시 이름은 1-50자여야 합니다.",
     "wrongPassword": "비밀번호는 8-64자여야 합니다.",
     "passwordRequired": "비밀번호를 입력해주세요.",
+    "invalidCharacters": "유효하지 않은 문자가 포함되어 있습니다.",
     "waitForApproval": "회원 등록이 완료됐습니다. 승인을 기다려주세요.",
     "signupSuccess": "회원가입 완료!",
     "redirectIn": "{{seconds}}초 후 메인 페이지로 이동합니다",

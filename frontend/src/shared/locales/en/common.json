@@ -67,6 +67,7 @@
     "wrongDisplayName": "Display name should be 1-50 characters.",
     "wrongPassword": "Password must be 8-64 characters.",
     "passwordRequired": "Please enter your password.",
+    "invalidCharacters": "Invalid characters detected.",
     "waitForApproval": "Registration completed. Please wait for approval.",
     "signupSuccess": "Signup Completed!",
     "redirectIn": "Redirecting to main page in {{seconds}} seconds",
