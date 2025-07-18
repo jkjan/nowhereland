@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/widgets/header";
+import { Toaster } from "@/shared/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Nowhere Land",
@@ -40,6 +41,7 @@ export default function RootLayout({
               {children}
             </div>
           </main>
+          <Toaster />
       </body>
     </html>
   );

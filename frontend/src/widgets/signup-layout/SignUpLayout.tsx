@@ -2,7 +2,7 @@
 
 import useSignUpForm from "@/features/user/signup/useSignUpForm";
 import { useTranslation } from "@/shared/lib/i18n";
-import { Button } from "@/shared/ui/button";
+import SubmitButton from "@/shared/ui/submit-button";
 import { Card } from "@/shared/ui/card";
 
 import {
@@ -17,7 +17,7 @@ import { Input } from "@/shared/ui/input"
 
 export default function SignUpLayout() {
     const { t } = useTranslation();
-    const { form, onSubmit } = useSignUpForm();
+    const { isLoading, form, onSubmit } = useSignUpForm();
 
     return (
         <>
@@ -39,19 +39,6 @@ export default function SignUpLayout() {
                         />
                         <FormField
                             control={form.control}
-                            name="username"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("user.username")}</FormLabel>
-                                    <FormControl>
-                                        <Input type="text" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
@@ -64,7 +51,10 @@ export default function SignUpLayout() {
                             )}
                         />
                         <div className="flex justify-end">
-                            <Button className="items-end bg-[var(--color-accent)] text-[var(--color-primary)]" type="submit">{t("common.next")}</Button>
+                            <SubmitButton
+                                isLoading={isLoading}
+                                text={t("common.next")}
+                            />
                         </div>
                     </form>
                 </Form>
