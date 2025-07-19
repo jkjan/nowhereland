@@ -1,0 +1,100 @@
+{
+  "common": {
+    "next": "다음",
+    "signIn": "로그인",
+    "signUp": "회원가입"
+  },
+  "navigation": {
+    "home": "홈",
+    "aboutMe": "소개",
+    "admin": "관리자",
+    "writePost": "글 쓰기",
+    "settings": "설정",
+    "dashboard": "대시보드"
+  },
+  "search": {
+    "placeholder": "검색어를 입력하세요...",
+    "clear": "지우기",
+    "noResults": "검색 결과가 없습니다",
+    "loading": "검색 중..."
+  },
+  "theme": {
+    "light": "라이트 모드",
+    "dark": "다크 모드",
+    "toggle": "테마 전환"
+  },
+  "language": {
+    "korean": "한국어",
+    "english": "English",
+    "toggle": "언어 전환"
+  },
+  "post": {
+    "readMore": "더 보기",
+    "viewCount": "조회 {{count}}회",
+    "published": "게시됨",
+    "tags": "태그"
+  },
+  "posts": {
+    "noMorePosts": "더 이상 글이 없습니다."
+  },
+  "pagination": {
+    "previous": "이전",
+    "next": "다음",
+    "page": "{{current}} / {{total}} 페이지"
+  },
+  "loading": {
+    "posts": "게시글을 불러오는 중...",
+    "search": "검색 중...",
+    "general": "로딩 중..."
+  },
+  "error": {
+    "general": "오류가 발생했습니다",
+    "unexpected": "예상치 못한 오류가 발생했습니다.",
+    "postsLoadFailed": "게시글을 불러오는데 실패했습니다",
+    "searchFailed": "검색에 실패했습니다. 다시 시도해주세요.",
+    "loadMoreFailed": "더 많은 게시글을 불러오는데 실패했습니다. 다시 시도해주세요.",
+    "unableToLoadPosts": "게시글을 불러올 수 없습니다. 다시 시도해주세요.",
+    "tryAgain": "다시 시도",
+    "retry": "재시도"
+  },
+  "user": {
+    "email": "이메일",
+    "username": "사용자 이름",
+    "displayName": "표시 이름",
+    "password": "비밀번호",
+    "wrongEmail": "이메일 형식을 확인해주세요.",
+    "wrongUsername": "사용자 이름은 3-30자여야 합니다.",
+    "wrongDisplayName": "표시 이름은 1-50자여야 합니다.",
+    "wrongPassword": "비밀번호는 8-64자여야 합니다.",
+    "passwordRequired": "비밀번호를 입력해주세요.",
+    "invalidCharacters": "유효하지 않은 문자가 포함되어 있습니다.",
+    "waitForApproval": "회원 등록이 완료됐습니다. 승인을 기다려주세요.",
+    "signupSuccess": "회원가입 완료!",
+    "redirectIn": "{{seconds}}초 후 메인 페이지로 이동합니다",
+    "signInSuccess": "로그인이 완료되었습니다.",
+    "signInError": "로그인에 실패했습니다."
+  },
+  "admin": {
+    "title": "관리자 페이지",
+    "subtitle": "블로그 관리 도구",
+    "writePost": "글 쓰기",
+    "writePostDesc": "새 블로그 포스트 작성",
+    "settings": "설정",
+    "settingsDesc": "사이트 설정 및 개인정보 관리",
+    "dashboard": "대시보드",
+    "dashboardDesc": "통계 및 분석 보기",
+    "signin": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃",
+    "logoutSuccess": "로그아웃이 완료되었습니다.",
+    "logoutError": "로그아웃 중 오류가 발생했습니다.",
+    "pending": {
+      "title": "계정 승인 대기중",
+      "subtitle": "계정이 승인을 기다리고 있습니다",
+      "accountCreated": "계정이 성공적으로 생성되었습니다",
+      "waitingForApproval": "관리자 승인을 기다리고 있습니다",
+      "explanation": "계정이 생성되었지만 관리자 패널 접근을 위해서는 관리자 승인이 필요합니다.",
+      "contactInfo": "계정을 활성화하려면 사이트 관리자에게 문의하세요."
+    }
+  }
+}

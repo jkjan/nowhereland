@@ -1,9 +1,9 @@
 'use client';
 
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation } from '@/shared/lib/i18n';
 import { useInfiniteScroll } from '@/shared/hooks';
 import { PostItem } from '../post-item';
-import { Post } from '@/entities/post';
+import { Post } from '@/entities/post/model';
 import { PostListErrorFallback } from '@/shared/ui/error-fallback';
 import { PostSkeleton } from '../post-skeleton';
 
@@ -53,7 +53,7 @@ export default function PostList({
   if (posts.length === 0 && !loading) {
     return (
       <div className="text-center py-12">
-        <p className="text-neutral text-lg">{t('search.noResults')}</p>
+        <p className="text-foreground text-lg">{t('search.noResults')}</p>
       </div>
     );
   }

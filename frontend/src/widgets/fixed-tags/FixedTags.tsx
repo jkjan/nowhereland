@@ -18,7 +18,7 @@ export default function FixedTags({
   
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium text-secondary mb-3 hidden md:block">
+      <h3 className="text-sm font-medium text-secondary-foreground mb-3 hidden md:block">
         태그
       </h3>
       

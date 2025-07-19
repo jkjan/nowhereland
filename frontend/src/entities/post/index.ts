@@ -1,1 +1,0 @@
-export type { Post, PostListState } from './model/types';

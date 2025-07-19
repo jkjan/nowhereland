@@ -1,6 +1,5 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { PostManagerRequest, ReferenceData, TocEntry, GeneratedTagData } from "../types/post-types.ts";
-import { nanoid } from "npm:nanoid";
 import { uuidv7 } from "npm:uuidv7";
 import DOMPurify from "npm:isomorphic-dompurify";
 

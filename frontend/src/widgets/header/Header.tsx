@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslation } from '@/lib/i18n';
-import { useTheme } from '@/lib/theme';
+import { useTranslation } from '@/shared/lib/i18n';
+import { useTheme } from '@/shared/lib/theme';
 import SunIcon from '@/shared/ui/sunicon';
 import MoonIcon from '@/shared/ui/moonicon';
 
@@ -29,7 +29,7 @@ export default function Header() {
             {/* Theme Toggle - Visible beyond xs (md+) according to ui.md */}
             <button
               onClick={toggleTheme}
-              className="hidden md:flex p-2 rounded-theme text-card-foreground hover:-translate-y-0.5 transition-all duration-200"
+              className="hidden md:flex p-2 rounded-theme hover:-translate-y-0.5 transition-all duration-200"
               title={t('theme.toggle')}
             >
               {theme === 'light' ? (
@@ -42,7 +42,7 @@ export default function Header() {
             {/* About Me / Admin */}
             <Link
               href="/about-me"
-              className="md:flex p-2 rounded-theme text-card-foreground hover:-translate-y-0.5 transition-all duration-200"
+              className="md:flex p-2 rounded-theme text-secondary-foreground hover:-translate-y-0.5 transition-all duration-200"
             >
               {t('navigation.aboutMe')}
             </Link>

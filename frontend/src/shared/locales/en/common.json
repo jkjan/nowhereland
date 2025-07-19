@@ -1,0 +1,100 @@
+{
+  "common": {
+    "next": "Next",
+    "signIn": "Sign In",
+    "signUp": "Sign Up"
+  },
+  "navigation": {
+    "home": "Home",
+    "aboutMe": "About Me",
+    "admin": "Admin",
+    "writePost": "Write Post",
+    "settings": "Settings",
+    "dashboard": "Dashboard"
+  },
+  "search": {
+    "placeholder": "Enter search terms...",
+    "clear": "Clear",
+    "noResults": "No search results found",
+    "loading": "Searching..."
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode",
+    "toggle": "Toggle theme"
+  },
+  "language": {
+    "korean": "한국어",
+    "english": "English",
+    "toggle": "Toggle language"
+  },
+  "post": {
+    "readMore": "Read more",
+    "viewCount": "{{count}} views",
+    "published": "Published",
+    "tags": "Tags"
+  },
+  "posts": {
+    "noMorePosts": "No more posts available."
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{current}} of {{total}}"
+  },
+  "loading": {
+    "posts": "Loading posts...",
+    "search": "Searching...",
+    "general": "Loading..."
+  },
+  "error": {
+    "general": "Something went wrong",
+    "unexpected": "We're sorry, but something unexpected happened.",
+    "postsLoadFailed": "Failed to load posts",
+    "searchFailed": "Failed to search posts. Please try again.",
+    "loadMoreFailed": "Failed to load more posts. Please try again.",
+    "unableToLoadPosts": "Unable to load posts. Please try again.",
+    "tryAgain": "Try again",
+    "retry": "Retry"
+  },
+  "user": {
+    "email": "Email",
+    "username": "Username",
+    "displayName": "Display Name",
+    "password": "Password",
+    "wrongEmail": "Please check email format.",
+    "wrongUsername": "Username should be 3-30 characters.",
+    "wrongDisplayName": "Display name should be 1-50 characters.",
+    "wrongPassword": "Password must be 8-64 characters.",
+    "passwordRequired": "Please enter your password.",
+    "invalidCharacters": "Invalid characters detected.",
+    "waitForApproval": "Registration completed. Please wait for approval.",
+    "signupSuccess": "Signup Completed!",
+    "redirectIn": "Redirecting to main page in {{seconds}} seconds",
+    "signInSuccess": "Successfully signed in.",
+    "signInError": "Sign in failed."
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "subtitle": "Blog management tools",
+    "writePost": "Write Post",
+    "writePostDesc": "Create a new blog post",
+    "settings": "Settings",
+    "settingsDesc": "Site settings and profile management",
+    "dashboard": "Dashboard",
+    "dashboardDesc": "View statistics and analytics",
+    "logout": "Logout",
+    "signin": "Sign In",
+    "signup": "Sign Up",
+    "logoutSuccess": "Successfully logged out.",
+    "logoutError": "Error occurred during logout.",
+    "pending": {
+      "title": "Account Pending",
+      "subtitle": "Your account is waiting for approval",
+      "accountCreated": "Account Created Successfully",
+      "waitingForApproval": "Your account is waiting for admin approval",
+      "explanation": "Your account has been created but requires admin approval before you can access the admin panel.",
+      "contactInfo": "Please contact the site administrator to activate your account."
+    }
+  }
+}

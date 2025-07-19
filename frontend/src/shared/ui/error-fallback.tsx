@@ -1,4 +1,4 @@
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation } from '@/shared/lib/i18n';
 
 interface ErrorFallbackProps {
   error?: Error;
