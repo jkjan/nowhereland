@@ -63,10 +63,10 @@ async function setupTestData() {
         id: 'test-user-001',
         username: 'testuser',
         email: 'test@example.com',
-        is_admin: false
+        is_admin: true
       }])
 
-    if (userError && !userError.message.includes('duplicate key')) {
+    if (userError) {
       console.error('Error creating test user:', userError)
       throw userError
     }
