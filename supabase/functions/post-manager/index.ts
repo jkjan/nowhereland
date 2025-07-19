@@ -42,6 +42,40 @@ Deno.serve(async (req: Request) => {
     );
   }
 
+  // Check if user is admin from JWT metadata
+  const userMetadata = userData.user.app_metadata || {};
+  const isAdmin = userMetadata.is_admin === true;
+  const userEmail = userMetadata.email;
+
+  if (!isAdmin) {
+    return new Response(
+      JSON.stringify({ error: "Forbidden" }),
+      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  if (!userEmail) {
+    return new Response(
+      JSON.stringify({ error: "User email not found in JWT" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  // Get user ID from database using email
+  const { data: userRecord, error: userError } = await supabaseClient
+    .from('user')
+    .select('id, is_active')
+    .eq('email', userEmail)
+    .eq('is_deleted', false)
+    .single();
+
+  if (userError || !userRecord) {
+    return new Response(
+      JSON.stringify({ error: "User not found" }),
+      { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
     const data: PostManagerRequest = await req.json();
     
@@ -54,7 +88,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (req.method === "POST") {
-      const result = await postService.createPost(userData.user.id, data);
+      const result = await postService.createPost(userRecord.id, data);
       return new Response(JSON.stringify(result), {
         status: 201,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -62,7 +96,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (req.method === "PATCH") {
-      const result = await postService.updatePost(userData.user.id, data as PostManagerRequest & { post_id: string });
+      const result = await postService.updatePost(userRecord.id, data as PostManagerRequest & { post_id: string });
       return new Response(JSON.stringify(result), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
