@@ -1,5 +1,4 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { ImageMetadata } from "../types/image-types.ts";
 import {
   ImageMagick,
   initializeImageMagick,
@@ -39,26 +38,6 @@ export class ImageService {
     return Math.abs(hash).toString(36);
   }
 
-  async getImageDimensions(buffer: ArrayBuffer): Promise<{ width: number; height: number }> {
-    await this.initializeImageMagick();
-    
-    return ImageMagick.read(new Uint8Array(buffer), (img: any) => {
-      return {
-        width: img.width,
-        height: img.height
-      };
-    });
-  }
-
-  async correctImageOrientation(buffer: ArrayBuffer): Promise<Uint8Array> {
-    await this.initializeImageMagick();
-    
-    return ImageMagick.read(new Uint8Array(buffer), (img: any) => {
-      img.autoOrient();
-      return img.write((data: Uint8Array) => data);
-    });
-  }
-
   async convertToWebP(buffer: ArrayBuffer, quality: number = 80): Promise<Uint8Array> {
     await this.initializeImageMagick();
     
@@ -83,37 +62,13 @@ export class ImageService {
     return data.path;
   }
 
-  createImageMetadata(width: number, height: number, fileSize: number, mimeType: string): ImageMetadata {
-    return {
-      original_width: width,
-      original_height: height,
-      file_size: fileSize,
-      mime_type: mimeType,
-      created_at: new Date().toISOString()
-    };
-  }
-
-  async processImage(file: File): Promise<{
-    hash: string;
-    originalPath: string;
-    webpPath: string;
-    metadata: ImageMetadata;
-  }> {
-    await this.initializeImageMagick();
-    
+  async processImage(file: File): Promise<{ hash: string; webp_url: string }> {
     // Read file buffer
     const originalBuffer = await file.arrayBuffer();
     const hash = this.generateImageHash(originalBuffer);
     
-    // Get image dimensions
-    const dimensions = await this.getImageDimensions(originalBuffer);
-    
-    // Correct EXIF orientation
-    const orientationCorrectedUint8 = await this.correctImageOrientation(originalBuffer);
-    const orientationCorrectedBuffer = orientationCorrectedUint8.buffer.slice(orientationCorrectedUint8.byteOffset, orientationCorrectedUint8.byteOffset + orientationCorrectedUint8.byteLength) as ArrayBuffer;
-    
     // Convert to WebP
-    const webpUint8 = await this.convertToWebP(orientationCorrectedBuffer, 80);
+    const webpUint8 = await this.convertToWebP(originalBuffer, 80);
     const webpBuffer = webpUint8.buffer.slice(webpUint8.byteOffset, webpUint8.byteOffset + webpUint8.byteLength) as ArrayBuffer;
 
     // Upload original file
@@ -121,17 +76,15 @@ export class ImageService {
     await this.uploadToStorage('post-images', originalPath, originalBuffer, file.type);
 
     // Upload WebP version
-    const webpPath = `${hash}/${dimensions.width}.webp`;
+    const webpPath = `${hash}/image.webp`;
     await this.uploadToStorage('post-images', webpPath, webpBuffer, 'image/webp');
 
-    // Create metadata and URLs
-    const metadata = this.createImageMetadata(dimensions.width, dimensions.height, file.size, file.type);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const webp_url = `${supabaseUrl}/functions/v1/image-cdn/${hash}`;
 
     return {
       hash,
-      originalPath,
-      webpPath,
-      metadata,
+      webp_url,
     };
   }
 }

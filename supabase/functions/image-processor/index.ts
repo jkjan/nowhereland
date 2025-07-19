@@ -76,9 +76,7 @@ Deno.serve(async (req: Request) => {
 
     const response: ImageProcessorResponse = {
       hash: result.hash,
-      original_url: `${supabaseUrl}/functions/v1/media-cdn/${result.hash}?width=original`,
-      webp_url: `${supabaseUrl}/functions/v1/media-cdn/${result.hash}?width=${result.metadata.original_width}`,
-      metadata: result.metadata,
+      webp_url: result.webp_url,
     };
 
     return new Response(JSON.stringify(response), {

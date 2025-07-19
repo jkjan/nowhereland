@@ -108,6 +108,7 @@ async function runImageProcessorTests() {
     const validFormData = createFormData(validImageBuffer)
     const uploadResult = await testRequest('POST', validFormData, 'Upload valid PNG image', 200)
     console.log(`📋 Image hash: ${uploadResult.hash}`)
+    console.log(`📋 WebP URL: ${uploadResult.webp_url}`)
     
     // Test 3: No image file provided
     console.log('🚫 Test 3: No Image File')
@@ -177,19 +178,11 @@ async function runImageProcessorTests() {
     const structureResult = await testRequest('POST', structureFormData, 'Validate response structure', 200)
     
     // Validate response has required fields
-    const requiredFields = ['hash', 'original_url', 'webp_url', 'metadata']
+    const requiredFields = ['hash', 'webp_url']
     const missingFields = requiredFields.filter(field => !structureResult.hasOwnProperty(field))
     
     if (missingFields.length > 0) {
       throw new Error(`Missing required fields: ${missingFields.join(', ')}`)
-    }
-    
-    // Validate metadata structure
-    const requiredMetadataFields = ['original_width', 'original_height', 'file_size', 'mime_type', 'created_at']
-    const missingMetadataFields = requiredMetadataFields.filter(field => !structureResult.metadata.hasOwnProperty(field))
-    
-    if (missingMetadataFields.length > 0) {
-      throw new Error(`Missing metadata fields: ${missingMetadataFields.join(', ')}`)
     }
     
     console.log('✅ PASS - Response structure is valid')
@@ -204,9 +197,9 @@ async function runImageProcessorTests() {
     console.log('✅ Authentication checks')
     console.log('✅ Multiple image formats')
     console.log('✅ Response structure validation')
-    console.log('✅ EXIF orientation handling')
-    console.log('✅ WebP conversion (no resizing)')
+    console.log('✅ WebP conversion')
     console.log('✅ Hash generation')
+    console.log('✅ Simple response (hash + webp_url only)')
     console.log('')
     console.log('🚀 image-processor function is production ready!')
     
