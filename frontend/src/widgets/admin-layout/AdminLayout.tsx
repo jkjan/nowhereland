@@ -5,6 +5,7 @@ import { useTranslation } from "@/shared/lib/i18n";
 import { Card } from "@/shared/ui/card";
 import { createClient } from "@/shared/lib/supabase/client";
 import { toast } from "sonner";
+import { Button } from "@/shared/ui/button";
 
 export default function AdminLayout() {
     const { t } = useTranslation();
@@ -46,14 +47,14 @@ export default function AdminLayout() {
     ];
 
     return (
-        <Card className="col-span-4 md:col-start-3 lg:col-start-5 p-4 mb-4 shadow-md hover:shadow-lg border-0 bg-white text-black">
+        <Card className="col-span-4 md:col-start-3 lg:col-start-5 p-4 mb-4 shadow-md hover:shadow-lg border-0">
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="text-center">
-                        <h1 className="text-2xl font-bold text-black mb-2">
+                        <h1 className="text-2xl font-bold mb-2">
                             {t("admin.title")}
                         </h1>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-sm">
                             {t("admin.subtitle")}
                         </p>
                     </div>
@@ -64,12 +65,12 @@ export default function AdminLayout() {
                             <button
                                 key={index}
                                 onClick={() => router.push(link.href)}
-                                className="w-full text-left p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors duration-200"
+                                className="w-full text-left p-4 rounded-lg border hover:bg-foreground hover:text-background transition-colors duration-200"
                             >
-                                <div className="font-medium text-black mb-1">
+                                <div className="font-medium mb-1">
                                     {link.title}
                                 </div>
-                                <div className="text-sm text-gray-600">
+                                <div className="text-sm">
                                     {link.description}
                                 </div>
                             </button>
@@ -77,13 +78,13 @@ export default function AdminLayout() {
                     </div>
 
                     {/* Logout Button */}
-                    <div className="pt-4 border-t border-gray-200">
-                        <button
+                    <div className="pt-4">
+                        <Button
                             onClick={handleLogout}
-                            className="w-full p-3 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors duration-200"
+                            className="w-full p-3 rounded-lg"
                         >
                             {t("admin.logout")}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </Card>
