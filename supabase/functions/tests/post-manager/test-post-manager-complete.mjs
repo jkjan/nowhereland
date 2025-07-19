@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 
-import { createClient } from '@supabase/supabase-js'
+import setupAuthentication from "../common/authentication.mjs"
 
-const SUPABASE_URL = 'http://127.0.0.1:54321'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
 const FUNCTION_URL = 'http://127.0.0.1:54321/functions/v1/post-manager'
 
 let accessToken = null
-let userId = null
+let userEmail = null
 
 async function testRequest(method, data, description, expectedStatus, headers = {}) {
   console.log(`📝 ${description}`)
@@ -63,53 +61,6 @@ async function testRequest(method, data, description, expectedStatus, headers = 
   }
 }
 
-async function setupAuthentication() {
-  console.log('🔑 Setting up authentication...')
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  
-  // Try to sign up, if user exists, sign in
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: 'test@example.com',
-    password: 'testpassword123'
-  })
-  
-  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-    email: 'test@example.com',
-    password: 'testpassword123'
-  })
-  
-  if (signInError) {
-    throw new Error(`Authentication failed: ${signInError.message}`)
-  }
-  
-  accessToken = signInData.session.access_token
-  userId = signInData.user.id
-  
-  // Create user record in database if it doesn't exist
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/user`, {
-      method: 'POST',
-      headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        id: userId,
-        username: 'testuser',
-        email: 'test@example.com',
-        is_admin: true
-      })
-    })
-  } catch (error) {
-    // User might already exist, ignore error
-  }
-  
-  console.log('✅ Authentication setup complete')
-  console.log(`📋 User ID: ${userId}`)
-  console.log('')
-}
-
 async function runCompleteTests() {
   console.log('🧪 Complete Post-Manager Test Suite')
   console.log('====================================')
@@ -118,7 +69,9 @@ async function runCompleteTests() {
   
   try {
     // Setup authentication
-    await setupAuthentication()
+    const authData = await setupAuthentication()
+    accessToken = authData.accessToken
+    userEmail = authData.userEmail
     
     // Test 1: OPTIONS request
     console.log('🌐 Test 1: CORS OPTIONS')
@@ -127,7 +80,6 @@ async function runCompleteTests() {
     // Test 2: Create post
     console.log('📝 Test 2: Create New Post')
     const createData = {
-      user_id: userId,
       title: 'Test Blog Post',
       content: '# Introduction\nThis is a test blog post.\n## Getting Started\nHere we go!',
       abstract: 'A test blog post',
@@ -149,11 +101,11 @@ async function runCompleteTests() {
     
     // Test 4: Validation - empty fields
     console.log('🚫 Test 4: Validation - Empty Fields')
-    await testRequest('POST', { user_id: userId, title: '', content: '' }, 'Empty title and content', 400)
+    await testRequest('POST', { title: '', content: '' }, 'Empty title and content', 400)
     
     // Test 5: Validation - missing post_id for update
     console.log('🚫 Test 5: Validation - Missing post_id')
-    await testRequest('PATCH', { user_id: userId, title: 'Test' }, 'PATCH without post_id', 400)
+    await testRequest('PATCH', { title: 'Test' }, 'PATCH without post_id', 400)
     
     // Test 6: Method not allowed
     console.log('🚫 Test 6: Method Not Allowed')
@@ -177,7 +129,6 @@ async function runCompleteTests() {
     // Test 7: Complex post with references
     console.log('📎 Test 7: Post with References')
     const complexData = {
-      user_id: userId,
       title: 'Complex Post',
       content: '# Complex Content\nWith references.',
       references: [{
@@ -205,7 +156,6 @@ async function runCompleteTests() {
     // Title too long
     const longTitle = 'A'.repeat(300)
     await testRequest('POST', {
-      user_id: userId,
       title: longTitle,
       content: 'Valid content'
     }, 'Title too long', 400)
@@ -213,7 +163,6 @@ async function runCompleteTests() {
     // Reference text too long  
     const longRefText = 'A'.repeat(1100)
     await testRequest('POST', {
-      user_id: userId,
       title: 'Valid title',
       content: 'Valid content',
       references: [{
@@ -226,7 +175,6 @@ async function runCompleteTests() {
     
     // Invalid status
     await testRequest('POST', {
-      user_id: userId,
       title: 'Valid title',
       content: 'Valid content',
       status: 'invalid_status'
