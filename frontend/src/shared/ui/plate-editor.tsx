@@ -16,7 +16,7 @@ export function PlateEditor() {
 
   return (
     <Plate editor={editor}>
-      <EditorContainer>
+      <EditorContainer className="rounded-xl scrollbar-hide">
         <Editor variant="demo" />
       </EditorContainer>
 

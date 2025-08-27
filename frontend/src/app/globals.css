@@ -2,7 +2,7 @@
 /*
   ---break---
 */
-@plugin "tailwind-scrollbar-hide";
+@import 'tailwind-scrollbar-hide/v4';
 @import "tw-animate-css";
 /*
   ---break---

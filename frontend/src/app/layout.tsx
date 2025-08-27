@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/widgets/header";
 import { Toaster } from "@/shared/ui/sonner";
+import { NextIntlClientProvider } from "next-intl";
 
 export const metadata: Metadata = {
   title: "Nowhere Land",
@@ -25,7 +26,8 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body className="antialiased h-screen overflow-hidden">
-        <Header />
+        <NextIntlClientProvider>
+          <Header />
           <main
             className="max-w-7xl mx-auto"
             style={{
@@ -42,6 +44,7 @@ export default function RootLayout({
             </div>
           </main>
           <Toaster />
+        </NextIntlClientProvider>
       </body>
     </html>
   );
