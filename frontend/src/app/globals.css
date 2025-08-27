@@ -1,4 +1,13 @@
 @import "tailwindcss";
+/*
+  ---break---
+*/
+@plugin "tailwind-scrollbar-hide";
+@import "tw-animate-css";
+/*
+  ---break---
+*/
+@custom-variant dark (&:is(.dark *));
 
 /*
   --color-primary: #f1f0ed;
@@ -61,6 +70,8 @@
   --spacing-margin: 16px; /* md */
   --spacing-gutter: 16px; /* md */
   --spacing-component: 16px;
+  --brand: oklch(0.623 0.214 259.815);
+  --highlight: oklch(0.852 0.199 91.936);
 }
 /* oklch(-1.1448 0 0) */
 /* Dark theme */
@@ -165,6 +176,8 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+  --color-highlight: var(--highlight);
+  --color-brand: var(--brand);
 }
 
 /* Responsive spacing breakpoints */
@@ -246,4 +259,26 @@ body {
   background: linear-gradient(315deg, rgba(255, 255, 255, 0.05) 0%, transparent 30%);
   border-radius: inherit;
   pointer-events: none;
+}
+
+/*
+  ---break---
+*/
+
+.dark {
+  --brand: oklch(0.707 0.165 254.624);
+  --highlight: oklch(0.852 0.199 91.936);
+}
+
+/*
+  ---break---
+*/
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

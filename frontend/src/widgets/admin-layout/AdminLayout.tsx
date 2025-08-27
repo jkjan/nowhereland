@@ -6,8 +6,9 @@ import { Card } from "@/shared/ui/card";
 import { createClient } from "@/shared/lib/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/shared/ui/button";
+import { UserMetadata } from "@supabase/supabase-js";
 
-export default function AdminLayout() {
+export default function AdminLayout({ userMetadata } : { userMetadata: UserMetadata }) {
     const { t } = useTranslation();
     const router = useRouter();
 
@@ -31,7 +32,7 @@ export default function AdminLayout() {
     const adminLinks = [
         {
             title: t("admin.writePost"),
-            href: "/admin/post/write",
+            href: "/admin/post/new",
             description: t("admin.writePostDesc")
         },
         {
@@ -52,10 +53,10 @@ export default function AdminLayout() {
                     {/* Header */}
                     <div className="text-center">
                         <h1 className="text-2xl font-bold mb-2">
-                            {t("admin.title")}
+                            {t("admin.greeting", {"name": userMetadata.username })}
                         </h1>
                         <p className="text-sm">
-                            {t("admin.subtitle")}
+                            {t("admin.title")}
                         </p>
                     </div>
 
