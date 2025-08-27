@@ -75,6 +75,7 @@
     "signInError": "로그인에 실패했습니다."
   },
   "admin": {
+    "greeting": "안녕하세요, {{name}}님!",
     "title": "관리자 페이지",
     "subtitle": "블로그 관리 도구",
     "writePost": "글 쓰기",
