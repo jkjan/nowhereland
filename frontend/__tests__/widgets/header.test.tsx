@@ -2,13 +2,6 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Header } from '@/widgets/header';
 
-// Mock the hooks
-jest.mock('@/lib/i18n', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
 jest.mock('@/lib/theme', () => ({
   useTheme: () => ({
     theme: 'light',

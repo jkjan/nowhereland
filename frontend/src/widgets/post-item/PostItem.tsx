@@ -1,12 +1,12 @@
 import { Post } from "@/entities/post/model/types";
-import { useTranslation } from "@/shared/lib/i18n";
 import { Card } from "@/shared/ui/card";
 import Tag from "@/shared/ui/tag";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export default function PostItem({ post }: { post: Post }) {
-    const { t } = useTranslation();
+    const t = useTranslations();
     
     return (
       <Link href={`/post/${post.id}`} className="block group">

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslation } from '@/shared/lib/i18n';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Search, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -12,7 +12,7 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ onSearch, initialValue = '' }: SearchBarProps) {
-  const { t } = useTranslation();
+  const t = useTranslations();
   const [query, setQuery] = useState(initialValue);
 
   const handleSubmit = (e: React.FormEvent) => {

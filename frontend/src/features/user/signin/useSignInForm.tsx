@@ -8,10 +8,10 @@ import { signIn } from "@/entities/user/api/userApi"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { useTranslation } from "@/shared/lib/i18n"
+import { useTranslations } from "next-intl"
 
 export default function useSignInForm() {
-  const { t } = useTranslation();
+  const t = useTranslations("user");
   const [ isLoading, setIsLoading ] = useState<boolean>(false);
   const router = useRouter();
 
@@ -33,11 +33,11 @@ export default function useSignInForm() {
       password: values.password
     }).then(() => {
       router.push("/admin");
-      toast(t("user.signInSuccess"));
+      toast(t("signInSuccess"));
     }).catch((err) => {
       // Log error for debugging without exposing sensitive data
       console.error('Sign in error:', err.name || 'Unknown error');
-      toast.error(err.message || t("user.signInError"));
+      toast.error(err.message || t("signInError"));
     }).finally(() => {
       setIsLoading(false);
     })

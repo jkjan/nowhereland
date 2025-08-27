@@ -1,14 +1,14 @@
 'use client';
 
-import { useTranslation } from '@/shared/lib/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import { CheckCircle, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/shared/lib/supabase/client';
+import { useTranslations } from 'next-intl';
 
 export default function PendingPage() {
-  const { t } = useTranslation();
+  const t = useTranslations("admin");
   const router = useRouter();
 
   const handleLogout = async () => {

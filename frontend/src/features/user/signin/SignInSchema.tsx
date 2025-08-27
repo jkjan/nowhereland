@@ -1,19 +1,19 @@
 "use client"
 
 import { z } from "zod"
-import { useTranslation } from '@/shared/lib/i18n';
 import { preventXSS, sanitizeEmailInput } from '@/shared/lib/sanitization';
+import { useTranslations } from "next-intl"
 
 export default function SignInSchema() {
-    const { t } = useTranslation();
+    const t = useTranslations("user");
 
     return z.object({
         email: z.string()
-            .email({ message: t("user.wrongEmail") })
-            .refine(preventXSS, { message: t("user.invalidCharacters") })
+            .email({ message: t("wrongEmail") })
+            .refine(preventXSS, { message: t("invalidCharacters") })
             .transform(sanitizeEmailInput),
         password: z.string()
-            .min(1, { message: t("user.passwordRequired") })
-            .refine(preventXSS, { message: t("user.invalidCharacters") }),
+            .min(1, { message: t("passwordRequired") })
+            .refine(preventXSS, { message: t("invalidCharacters") }),
     })
 }

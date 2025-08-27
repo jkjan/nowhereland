@@ -1,7 +1,7 @@
 'use client';
 
 import { FixedTags } from '@/widgets/fixed-tags';
-import { FixedHeader } from '../../widgets/fixed-header';
+import { FixedHeader } from '../../../widgets/fixed-header';
 import { useHomePageState } from '@/features/home';
 import { ScrollablePostList } from '@/widgets/scrollable-post-list';
 
