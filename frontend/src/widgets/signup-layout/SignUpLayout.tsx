@@ -1,7 +1,6 @@
 "use client";
 
 import useSignUpForm from "@/features/user/signup/useSignUpForm";
-import { useTranslation } from "@/shared/lib/i18n";
 import SubmitButton from "@/shared/ui/submit-button";
 import { Card } from "@/shared/ui/card";
 
@@ -14,9 +13,10 @@ import {
     FormMessage,
 } from "@/shared/ui/form"
 import { Input } from "@/shared/ui/input"
+import { useTranslations } from "next-intl";
 
 export default function SignUpLayout() {
-    const { t } = useTranslation();
+    const t = useTranslations();
     const { isLoading, form, onSubmit } = useSignUpForm();
 
     return (

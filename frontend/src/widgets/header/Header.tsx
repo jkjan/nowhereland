@@ -1,13 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslation } from '@/shared/lib/i18n';
 import { useTheme } from '@/shared/lib/theme';
 import SunIcon from '@/shared/ui/sunicon';
 import MoonIcon from '@/shared/ui/moonicon';
+import { useTranslations } from 'next-intl';
 
 export default function Header() {
-  const { t } = useTranslation();
+  const t = useTranslations();
   const { theme, toggleTheme } = useTheme();
 
   return (

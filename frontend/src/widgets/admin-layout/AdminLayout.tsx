@@ -1,14 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTranslation } from "@/shared/lib/i18n";
 import { Card } from "@/shared/ui/card";
 import { createClient } from "@/shared/lib/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/shared/ui/button";
+import { UserMetadata } from "@supabase/supabase-js";
+import { useTranslations } from "next-intl";
 
-export default function AdminLayout() {
-    const { t } = useTranslation();
+export default function AdminLayout({ userMetadata } : { userMetadata: UserMetadata }) {
+    const t = useTranslations("admin");
     const router = useRouter();
 
     const handleLogout = async () => {
@@ -17,32 +18,32 @@ export default function AdminLayout() {
             const { error } = await supabase.auth.signOut();
             
             if (error) {
-                toast.error(t("admin.logoutError"));
+                toast.error(t("logoutError"));
             } else {
-                toast.success(t("admin.logoutSuccess"));
+                toast.success(t("logoutSuccess"));
                 router.push("/");
             }
         } catch (error) {
             console.error('Logout error:', error);
-            toast.error(t("admin.logoutError"));
+            toast.error(t("logoutError"));
         }
     };
 
     const adminLinks = [
         {
-            title: t("admin.writePost"),
-            href: "/admin/post/write",
-            description: t("admin.writePostDesc")
+            title: t("writePost"),
+            href: "/admin/post/new",
+            description: t("writePostDesc")
         },
         {
-            title: t("admin.settings"),
+            title: t("settings"),
             href: "/admin/settings",
-            description: t("admin.settingsDesc")
+            description: t("settingsDesc")
         },
         {
-            title: t("admin.dashboard"),
+            title: t("dashboard"),
             href: "/admin/dashboard",
-            description: t("admin.dashboardDesc")
+            description: t("dashboardDesc")
         }
     ];
 
@@ -52,10 +53,10 @@ export default function AdminLayout() {
                     {/* Header */}
                     <div className="text-center">
                         <h1 className="text-2xl font-bold mb-2">
-                            {t("admin.title")}
+                            {t("greeting", {"name": userMetadata.username })}
                         </h1>
                         <p className="text-sm">
-                            {t("admin.subtitle")}
+                            {t("title")}
                         </p>
                     </div>
 
@@ -83,7 +84,7 @@ export default function AdminLayout() {
                             onClick={handleLogout}
                             className="w-full p-3 rounded-lg"
                         >
-                            {t("admin.logout")}
+                            {t("logout")}
                         </Button>
                     </div>
                 </div>
